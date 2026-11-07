@@ -173,6 +173,7 @@
 
   function fitTo(bounds) {
     if (!bounds || !bounds.length) return;
+    map.invalidateSize(false);
     if (bounds.length === 1) { map.setView(bounds[0], 15); return; }
     map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
   }
@@ -632,8 +633,22 @@
       readHash();
       if (before !== state.day + "/" + state.placeId) renderAll(true);
     });
-    var rt;
-    window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(function () { map.invalidateSize(); }, 150); });
+    var rt, lastW = 0, lastH = 0;
+    function onResize() {
+      clearTimeout(rt);
+      rt = setTimeout(function () {
+        var el = $("map");
+        if (!el.clientWidth || !el.clientHeight) return;
+        var refit = !lastW || Math.abs(el.clientWidth - lastW) > 40 || Math.abs(el.clientHeight - lastH) > 40;
+        lastW = el.clientWidth; lastH = el.clientHeight;
+        map.invalidateSize(false);
+        if (refit && !state.placeId) fitTo(currentBounds());
+      }, 150);
+    }
+    window.addEventListener("resize", onResize);
+    if (window.ResizeObserver) new ResizeObserver(onResize).observe($("map"));
+    window.addEventListener("load", onResize);
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) onResize(); });
   }
 
   /* ---------- boot ---------- */
