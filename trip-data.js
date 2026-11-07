@@ -40,7 +40,7 @@ window.TRIP_DATA = {
       weekday: "토",
       title: "나리타 도착 → 하코네유모토 온천마을 → 고라",
       stay: "Gora Onsen Kinkaku (예약 완료)",
-      color: "#C8553D",
+      color: "#E0795A",
       schedule: [
         { time: "08:30", text: "인천국제공항 출발 (편명·터미널 확인 필요)", kind: "flight" },
         { time: "10:00–10:30", text: "나리타국제공항 도착 예상", kind: "flight", place: "d1-narita" },
@@ -146,7 +146,7 @@ window.TRIP_DATA = {
       weekday: "일",
       title: "오와쿠다니 → 신주쿠 → 다이칸야마 → 시부야",
       stay: "신주쿠 지역 예약 숙소 (예약 완료 · 숙소명 대조 필요)",
-      color: "#3E6A8A",
+      color: "#1E88C8",
       schedule: [
         { time: "07:30–08:30", text: "기상 및 체크아웃 준비", kind: "stay", place: "d2-kinkaku" },
         { time: "08:30–09:00", text: "가미고라 → 소운잔 (케이블카)", kind: "move", place: "d2-sounzan" },
@@ -310,7 +310,7 @@ window.TRIP_DATA = {
       weekday: "월",
       title: "아사쿠사 → 나리타공항 → 인천",
       stay: "귀국",
-      color: "#7A5C99",
+      color: "#5B63B7",
       schedule: [
         { time: "07:30", text: "기상", kind: "stay" },
         { time: "08:00–08:30", text: "숙소 체크아웃", kind: "stay", place: "d3-hotel" },

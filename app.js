@@ -198,7 +198,7 @@
   /* ---------- tabs ---------- */
   function renderTabs() {
     var el = $("day-tabs");
-    var tabs = [{ id: "all", label: "전체", sub: state.data.meta.dates, color: "#2F3E5C" }].concat(
+    var tabs = [{ id: "all", label: "전체", sub: state.data.meta.dates, color: "#1F4E79" }].concat(
       state.data.days.map(function (d) {
         return { id: d.id, label: d.label, sub: d.date.slice(5).replace("-", ".") + " (" + d.weekday + ")", color: d.color };
       })
@@ -224,7 +224,7 @@
     var el = $("day-summary");
     if (state.day === "all") {
       var m = state.data.meta;
-      el.style.setProperty("--day-color", "#2F3E5C");
+      el.style.setProperty("--day-color", "#1F4E79");
       el.innerHTML = "<h2>" + esc(m.title) + "</h2>" +
         "<p>" + esc(m.dates) + " · " + esc(m.travelers) + " · " + esc(m.subtitle) + "</p>" +
         "<p>" + esc(m.purpose) + "</p><p>" + esc(m.budgetNote) + "</p>" +
@@ -514,7 +514,7 @@
         if (p.lng != null && (typeof p.lng !== "number" || p.lng < -180 || p.lng > 180)) return p.id + "의 lng 값이 올바르지 않습니다.";
         if (typeof p.order !== "number") p.order = j + 1;
       }
-      day.color = /^#[0-9a-f]{3,8}$/i.test(day.color || "") ? day.color : "#C8553D";
+      day.color = /^#[0-9a-f]{3,8}$/i.test(day.color || "") ? day.color : "#2B8FD6";
       day.schedule = Array.isArray(day.schedule) ? day.schedule : [];
       day.weekday = day.weekday || "";
       day.date = day.date || "";
