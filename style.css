@@ -73,7 +73,7 @@ button { font: inherit; }
   display: flex; gap: 8px; align-items: center;
   padding: 0 14px; overflow-x: auto; scrollbar-width: none;
   background: var(--paper); border-bottom: 1px solid var(--line);
-  position: sticky; top: 0; z-index: 1000;
+  position: sticky; top: 0; z-index: 1100;
 }
 .day-tabs::-webkit-scrollbar { display: none; }
 .tab {
@@ -89,7 +89,8 @@ button { font: inherit; }
 
 /* ---------- layout ---------- */
 .layout { display: grid; grid-template-columns: 1fr; }
-.map-wrap { position: relative; height: 48vh; min-height: 300px; }
+.map-wrap { position: relative; height: 48vh; min-height: 300px; isolation: isolate; z-index: 0; }
+/* Leaflet 컨트롤(z-index 1000)이 고정 탭 위로 올라오지 않도록 지도 영역을 별도 쌓임 맥락으로 묶는다 */
 #map { position: absolute; inset: 0; background: #E2EEF6; }
 .panel { padding: 14px 14px 40px; }
 
