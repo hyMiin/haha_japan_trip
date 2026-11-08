@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#EAF5FC">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%232B8FD6'/%3E%3Ctext x='32' y='42' font-size='28' text-anchor='middle' fill='%23fff' font-family='serif'%3E4%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
   <header class="site-header">
@@ -28,9 +28,20 @@
     </div>
   </header>
 
+  <nav class="view-nav" id="view-nav" aria-label="메뉴">
+    <a href="#all" data-view="map">지도·일정</a>
+    <a href="#transport" data-view="transport">교통</a>
+    <a href="#budget" data-view="budget">예산</a>
+    <a href="#wallet" data-view="wallet">Wallet</a>
+    <a href="#tickets" data-view="tickets">예약·티켓</a>
+    <a href="#emergency" data-view="emergency">비상 대응</a>
+  </nav>
+
   <nav class="day-tabs" id="day-tabs" role="tablist" aria-label="날짜 선택"></nav>
 
-  <main class="layout">
+  <main class="guide" id="guide-view" hidden></main>
+
+  <main class="layout" id="map-view">
     <section class="map-wrap" aria-label="지도">
       <div id="map" role="application" aria-label="여행 장소 지도"></div>
       <div class="map-tools">
@@ -90,10 +101,7 @@
         <div id="verification"></div>
       </details>
 
-      <details class="fold">
-        <summary>예산 (2인 합산 약 600,000원 · 항공권 제외)</summary>
-        <div id="budget"></div>
-      </details>
+      <p class="fold-link"><a href="#budget">예산 관리표 (2인 합산 약 700,000원) 열기 →</a> · <a href="#transport">구간별 교통편 →</a></p>
 
       <details class="fold">
         <summary>일정에서 제외한 장소</summary>
@@ -110,7 +118,9 @@
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="vendor/leaflet/leaflet.js"></script>
-  <script src="trip-data.js?v=7"></script>
-  <script src="app.js?v=7"></script>
+  <script src="trip-data.js?v=9"></script>
+  <script src="guide-data.js?v=9"></script>
+  <script src="guide.js?v=9"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

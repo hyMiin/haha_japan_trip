@@ -4,7 +4,6 @@
 (function () {
   "use strict";
 
-  var BUDGET_KEY = "haha-trip-budget-v1";
   var DATA_KEY = "haha-trip-imported-v1";
   var STATUS = {
     booked: { label: "예약 완료", cls: "st-booked" },
@@ -152,7 +151,7 @@
 
     if (state.showLines) {
       visibleDays().forEach(function (d) {
-        var pts = (d.places || []).filter(hasCoord).slice().sort(function (a, b) { return a.order - b.order; })
+        var pts = (d.places || []).filter(function (p) { return hasCoord(p) && p.status !== "optional"; }).slice().sort(function (a, b) { return a.order - b.order; })
           .map(function (p) { return [p.lat, p.lng]; });
         if (d.returnTo) {
           var r = (d.places || []).filter(function (p) { return p.id === d.returnTo; })[0];
@@ -357,73 +356,6 @@
       '<li style="list-style:none;margin-left:-18px;color:var(--muted);margin-top:4px">다이칸야마는 제외 대상이 아니며 DAY 2에 유지합니다.</li>';
   }
 
-  /* ---------- budget ---------- */
-  function loadBudget() {
-    var raw = storageGet(BUDGET_KEY);
-    if (!raw) return;
-    try {
-      var saved = JSON.parse(raw);
-      applyBudgetValues(saved);
-    } catch (e) { /* ignore */ }
-  }
-  function applyBudgetValues(saved) {
-    if (!saved || !state.data.budget) return;
-    if (typeof saved.rateJPYtoKRW === "number") state.data.budget.rateJPYtoKRW = saved.rateJPYtoKRW;
-    (saved.items || []).forEach(function (s) {
-      state.data.budget.items.forEach(function (it) {
-        if (it.id === s.id) {
-          it.amount = typeof s.amount === "number" ? s.amount : null;
-          if (s.currency === "KRW" || s.currency === "JPY") it.currency = s.currency;
-        }
-      });
-    });
-  }
-  function saveBudget() {
-    var b = state.data.budget;
-    storageSet(BUDGET_KEY, JSON.stringify({
-      rateJPYtoKRW: b.rateJPYtoKRW,
-      items: b.items.map(function (i) { return { id: i.id, amount: i.amount, currency: i.currency }; })
-    }));
-  }
-  function renderBudget() {
-    var b = state.data.budget;
-    if (!b) { $("budget").innerHTML = ""; return; }
-    var h = '<p class="fold-lead">실제 숙박비·교통비·환율 값이 없어 금액을 미리 채우지 않았습니다. 결제액이나 운임을 확인하면 입력하세요. 입력값은 이 브라우저에만 저장되고 JSON 내보내기에 포함됩니다.</p>';
-    h += '<div class="budget-rate"><label for="rate">환율 100엔 =</label><input id="rate" type="number" inputmode="decimal" min="0" step="0.01" placeholder="원 (예: 직접 확인)" value="' +
-      (typeof b.rateJPYtoKRW === "number" ? esc(b.rateJPYtoKRW * 100) : "") + '"><span>원</span></div>';
-    h += '<table class="budget-table"><tbody>' + b.items.map(function (it, idx) {
-      return "<tr><td>" + esc(it.label) + '</td><td class="amt"><div class="amt-wrap"><input type="number" inputmode="numeric" min="0" step="1" data-bidx="' + idx +
-        '" value="' + (typeof it.amount === "number" ? esc(it.amount) : "") + '" placeholder="미입력" aria-label="' + esc(it.label) + ' 금액">' +
-        '<select data-bcur="' + idx + '" aria-label="통화"><option value="KRW"' + (it.currency === "KRW" ? " selected" : "") + '>원</option><option value="JPY"' +
-        (it.currency === "JPY" ? " selected" : "") + ">엔</option></select></div></td></tr>";
-    }).join("") + "</tbody></table>";
-    h += '<div class="budget-total" id="budget-total"></div>';
-    $("budget").innerHTML = h;
-    updateBudgetTotal();
-  }
-  function updateBudgetTotal() {
-    var b = state.data.budget;
-    var rate = b.rateJPYtoKRW;
-    var sum = 0, missing = 0, needRate = 0;
-    b.items.forEach(function (it) {
-      if (typeof it.amount !== "number") { missing++; return; }
-      if (it.currency === "JPY") {
-        if (typeof rate !== "number") { needRate++; return; }
-        sum += it.amount * rate;
-      } else sum += it.amount;
-    });
-    var fmt = function (n) { return Math.round(n).toLocaleString("ko-KR") + "원"; };
-    var h = '입력된 항목 합계 <span class="big">' + fmt(sum) + "</span> / 목표 " + fmt(b.totalKRW);
-    if (missing || needRate) {
-      h += "<br>미입력 " + missing + "개" + (needRate ? " · 환율이 없어 합산하지 못한 엔화 항목 " + needRate + "개" : "") +
-        " — 예산 검증 전입니다.";
-    } else {
-      var diff = b.totalKRW - sum;
-      h += "<br>" + (diff >= 0 ? '<span class="under">' + fmt(diff) + " 여유</span>" : '<span class="over">' + fmt(-diff) + " 초과</span>") + " (입력값 기준)";
-    }
-    $("budget-total").innerHTML = h;
-  }
-
   /* ---------- selection & routing ---------- */
   function selectPlace(id, opts) {
     opts = opts || {};
@@ -474,10 +406,16 @@
   }
 
   function updateHash() {
+    if (isGuideHash()) return;
     var h = "#" + state.day + (state.placeId ? "/" + state.placeId : "");
     if (location.hash !== h) history.replaceState(null, "", h);
   }
+  function isGuideHash() {
+    var v = location.hash.replace(/^#/, "").split("/")[0];
+    return !!(window.TripGuide && window.TripGuide.isView(v));
+  }
   function readHash() {
+    if (isGuideHash()) return;
     var parts = location.hash.replace(/^#/, "").split("/");
     if (parts[0] && (parts[0] === "all" || dayById(parts[0]))) state.day = parts[0];
     if (parts[1] && findPlace(parts[1])) state.placeId = parts[1];
@@ -486,6 +424,7 @@
   /* ---------- import / export ---------- */
   function exportJson() {
     var out = clone(state.data);
+    if (window.TripGuide) out.budgetLedger = window.TripGuide.getLedger();
     out.exportedAt = new Date().toISOString();
     var blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
     var a = document.createElement("a");
@@ -532,12 +471,11 @@
       try { parsed = JSON.parse(reader.result); } catch (e) { toast("JSON 형식이 올바르지 않습니다."); return; }
       var err = validate(parsed);
       if (err) { toast("가져오기 실패: " + err); return; }
-      parsed.budget = parsed.budget || clone(window.TRIP_DATA.budget);
+      if (parsed.budgetLedger && window.TripGuide) window.TripGuide.setLedger(parsed.budgetLedger);
       state.data = parsed;
       state.day = "all"; state.placeId = null; state.query = ""; $("search-input").value = "";
       storageSet(DATA_KEY, JSON.stringify(parsed));
       state.imported = true;
-      saveBudget();
       renderStatic();
       renderAll(true);
       updateHash();
@@ -556,7 +494,6 @@
     $("notice-list").innerHTML = (state.data.notices || []).map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") +
       (state.imported ? '<li><b>가져온 JSON 일정을 표시 중입니다.</b> <button type="button" class="btn" data-reset-data>기본 일정으로 되돌리기</button></li>' : "");
     renderVerification();
-    renderBudget();
     renderExcluded();
   }
 
@@ -580,7 +517,7 @@
       if (e.target.closest("[data-close-detail]")) { state.placeId = null; map.closePopup(); renderDetail(); renderPlaces(); renderMap(false); updateHash(); return; }
       if (e.target.closest("[data-reset-data]")) {
         try { window.localStorage.removeItem(DATA_KEY); } catch (er) { /* ignore */ }
-        state.data = clone(window.TRIP_DATA); state.imported = false; loadBudget();
+        state.data = clone(window.TRIP_DATA); state.imported = false;
         state.day = "all"; state.placeId = null; renderStatic(); renderAll(true); updateHash(); toast("기본 일정으로 되돌렸습니다."); return;
       }
       var g = e.target.closest("[data-goto-detail]");
@@ -610,25 +547,8 @@
       if (this.files && this.files[0]) importJson(this.files[0]);
       this.value = "";
     });
-    $("budget").addEventListener("input", function (e) {
-      var b = state.data.budget;
-      if (e.target.id === "rate") {
-        var v = parseFloat(e.target.value);
-        b.rateJPYtoKRW = isFinite(v) && v > 0 ? v / 100 : null;
-      } else if (e.target.hasAttribute("data-bidx")) {
-        var it = b.items[+e.target.getAttribute("data-bidx")];
-        var n = parseFloat(e.target.value);
-        it.amount = isFinite(n) && n >= 0 ? n : null;
-      }
-      saveBudget(); updateBudgetTotal();
-    });
-    $("budget").addEventListener("change", function (e) {
-      if (e.target.hasAttribute("data-bcur")) {
-        state.data.budget.items[+e.target.getAttribute("data-bcur")].currency = e.target.value;
-        saveBudget(); updateBudgetTotal();
-      }
-    });
     window.addEventListener("hashchange", function () {
+      if (isGuideHash()) return;
       var before = state.day + "/" + state.placeId;
       readHash();
       if (before !== state.day + "/" + state.placeId) renderAll(true);
@@ -659,10 +579,9 @@
     if (stored) {
       try {
         var sd = JSON.parse(stored);
-        if (!validate(sd)) { sd.budget = sd.budget || clone(window.TRIP_DATA.budget); state.data = sd; state.imported = true; }
+        if (!validate(sd)) { state.data = sd; state.imported = true; }
       } catch (e) { /* ignore */ }
     }
-    loadBudget();
     readHash();
     if (typeof L === "undefined") {
       $("map").innerHTML = "<p style='padding:16px'>지도 라이브러리를 불러오지 못했습니다. 일정 목록은 아래에서 볼 수 있습니다.</p>";
@@ -676,7 +595,10 @@
     bind();
     renderAll(true);
     if (state.placeId) selectPlace(state.placeId, { from: "map" });
-    window.__tripViewer = { state: state, selectPlace: selectPlace, setDay: setDay }; // 디버그·테스트용
+    window.__tripViewer = {
+      state: state, selectPlace: selectPlace, setDay: setDay,
+      refresh: function () { if (map && map.invalidateSize) { map.invalidateSize(false); if (!state.placeId) fitTo(currentBounds()); } }
+    }; // 디버그·테스트용
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
