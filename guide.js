@@ -4,7 +4,7 @@
 (function () {
   "use strict";
 
-  var VIEWS = ["transport", "budget", "wallet", "tickets", "emergency"];
+  var VIEWS = ["transport", "budget", "wallet", "tickets", "food", "emergency"];
   var LEDGER_KEY = "haha-trip-ledger-v2";
   var CHECK_KEY = "haha-trip-checklist-v1";
   var G = window.GUIDE_DATA || { views: {}, budget: null };
@@ -86,6 +86,12 @@
         return segment(b);
       case "checklist":
         return checklist(b);
+      case "places":
+        return (b.title ? '<h4 class="g-sub">' + fmt(b.title) + "</h4>" : "") + '<ul class="g-places">' + b.items.map(function (it) {
+          var url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(it.query || it.name);
+          return '<li><a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" class="g-place-name">' + esc(it.name) + ' ↗</a>' +
+            '<span class="g-place-meta">' + esc(it.menu) + " · " + esc(it.price) + " / 1인</span></li>";
+        }).join("") + "</ul>";
       case "sources":
         return '<div class="g-sources"><strong>출처</strong>' + (b.checked ? ' <small>확인일 ' + esc(b.checked) + "</small>" : "") +
           "<ul>" + b.items.map(function (s) {
@@ -127,7 +133,7 @@
     var d = G.views[v];
     if (!d) { el.innerHTML = "<p>내용이 없습니다.</p>"; return; }
     var h = '<div class="g-inner"><header class="g-head"><h2>' + fmt(d.title) + "</h2>" + (d.intro ? "<p>" + fmt(d.intro) + "</p>" : "") +
-      (G.checked ? '<p class="g-meta">정보 확인일 ' + esc(G.checked) + " · 출처는 각 항목 아래</p>" : "") + "</header>";
+      (G.checked && !d.noMeta ? '<p class="g-meta">정보 확인일 ' + esc(G.checked) + " · 출처는 각 항목 아래</p>" : "") + "</header>";
     if (d.sections && d.sections.length > 2) {
       h += '<nav class="g-toc" aria-label="목차">' + d.sections.map(function (s, i) {
         return '<a href="#' + v + "/s" + i + '" data-toc="s' + i + '">' + esc(s.h) + "</a>";

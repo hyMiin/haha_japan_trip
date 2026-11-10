@@ -422,3 +422,10 @@ button { font: inherit; }
   .lg-cats input { min-width: 74px; font-size: 13px; padding: 4px 5px; }
   .lg-cats thead th { white-space: normal; }
 }
+
+.g-places { list-style: none; margin: 4px 0 8px; padding: 0; }
+.g-places li { padding: 9px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 2px; }
+.g-places li:last-child { border-bottom: none; }
+.g-place-name { font-weight: 700; font-size: 15px; text-decoration: none; color: var(--sea); }
+.g-place-name:hover { text-decoration: underline; }
+.g-place-meta { font-size: 13px; color: var(--muted); }
