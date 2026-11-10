@@ -429,3 +429,5 @@ button { font: inherit; }
 .g-place-name { font-weight: 700; font-size: 15px; text-decoration: none; color: var(--sea); }
 .g-place-name:hover { text-decoration: underline; }
 .g-place-meta { font-size: 13px; color: var(--muted); }
+.gm-pop { font-family: var(--font); font-size: 13px; line-height: 1.45; color: var(--ink); }
+.gm-pop b { font-size: 14px; }

@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#EAF5FC">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%232B8FD6'/%3E%3Ctext x='32' y='42' font-size='28' text-anchor='middle' fill='%23fff' font-family='serif'%3E4%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="style.css?v=10">
+  <link rel="stylesheet" href="style.css?v=11">
 </head>
 <body>
   <header class="site-header">
@@ -46,6 +46,7 @@
     <section class="map-wrap" aria-label="지도">
       <div id="map" role="application" aria-label="여행 장소 지도"></div>
       <div class="map-tools">
+        <button type="button" class="map-btn" id="btn-provider" hidden>구글 지도로 보기</button>
         <button type="button" class="map-btn" id="btn-fit" title="선택한 날짜의 장소 전체 보기">전체 보기</button>
         <button type="button" class="map-btn" id="btn-lines" aria-pressed="true" title="방문 순서 직선 표시 켜기/끄기">순서선</button>
       </div>
@@ -109,19 +110,17 @@
         <ul class="plain" id="excluded"></ul>
       </details>
 
-      <footer class="panel-foot">
-        지도 데이터 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> 기여자 ·
-        지도 라이브러리 <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a> (BSD-2-Clause)
-      </footer>
+      <footer class="panel-foot" id="map-credit"></footer>
     </aside>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <script src="vendor/leaflet/leaflet.js"></script>
-  <script src="trip-data.js?v=10"></script>
-  <script src="guide-data.js?v=10"></script>
-  <script src="guide.js?v=10"></script>
-  <script src="app.js?v=10"></script>
+  <script src="maps.js?v=11"></script>
+  <script src="trip-data.js?v=11"></script>
+  <script src="guide-data.js?v=11"></script>
+  <script src="guide.js?v=11"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

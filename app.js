@@ -27,7 +27,7 @@
     imported: false
   };
 
-  var map, markerLayer, lineLayer, markersById = {};
+  var map = null, markersById = {}, mapProvider = "osm", PROVIDER_KEY = "haha-trip-map-provider";
   var $ = function (id) { return document.getElementById(id); };
 
   /* ---------- utils ---------- */
@@ -81,16 +81,41 @@
   }
 
   /* ---------- map ---------- */
-  function initMap() {
-    map = L.map("map", { zoomControl: true, scrollWheelZoom: true, zoomSnap: 0.25, wheelPxPerZoomLevel: 90, tapTolerance: 20 });
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    L.control.scale({ imperial: false }).addTo(map);
-    lineLayer = L.layerGroup().addTo(map);
-    markerLayer = L.layerGroup().addTo(map);
-    map.setView([35.45, 139.55], 9);
+  var NO_MAP = { clear: function () {}, addMarker: function () { return { openPopup: function () {} }; }, addLine: function () {},
+    fit: function () {}, flyTo: function () {}, getZoom: function () { return 9; }, invalidate: function () {}, closePopup: function () {}, destroy: function () {} };
+
+  function providerLabel() { return mapProvider === "google" ? "구글 지도" : "OpenStreetMap"; }
+  function updateProviderUi() {
+    var b = $("btn-provider");
+    if (b) {
+      b.textContent = mapProvider === "google" ? "OSM으로 보기" : "구글 지도로 보기";
+      b.hidden = !(window.TripMap && window.TripMap.hasGoogleKey);
+    }
+    var f = $("map-credit");
+    if (f) f.innerHTML = mapProvider === "google"
+      ? "지도 © Google · 지도 표시는 Google Maps Platform"
+      : '지도 데이터 © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> 기여자 · 지도 라이브러리 <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a> (BSD-2-Clause)';
+  }
+
+  function setProvider(want, quiet) {
+    var el = $("map");
+    if (map && map.destroy) { try { map.destroy(); } catch (e) { /* ignore */ } }
+    map = NO_MAP;
+    el.innerHTML = "";
+    if (!window.TripMap) { el.innerHTML = "<p style='padding:16px'>지도를 불러오지 못했습니다. 일정 목록은 아래에서 볼 수 있습니다.</p>"; return Promise.resolve(); }
+    return window.TripMap.create(want, el).then(function (m) {
+      map = m; mapProvider = m.kind;
+    }, function (err) {
+      if (want === "google") {
+        if (!quiet) toast("구글 지도를 불러오지 못해 OpenStreetMap으로 표시합니다.");
+        return window.TripMap.create("osm", el).then(function (m) { map = m; mapProvider = "osm"; });
+      }
+      el.innerHTML = "<p style='padding:16px'>지도를 불러오지 못했습니다. 일정 목록은 아래에서 볼 수 있습니다.</p>";
+    }).then(function () {
+      updateProviderUi();
+      renderMap(true);
+      if (state.placeId) selectPlace(state.placeId, { from: "map" });
+    });
   }
 
   function pinClasses(p) {
@@ -103,8 +128,8 @@
   }
 
   function renderMap(fit) {
-    markerLayer.clearLayers();
-    lineLayer.clearLayers();
+    if (!map) return;
+    map.clear();
     markersById = {};
     var q = state.query.trim();
     var entries = [];
@@ -130,21 +155,13 @@
         if (p.id === state.placeId) cls.push("active");
         if (q && !matches(e, q)) cls.push("dim");
         var label = state.day === "all" ? e.day.label.replace("DAY ", "") + "·" + p.order : p.order;
-        var icon = L.divIcon({
-          className: "pin-icon",
-          html: '<div class="' + cls.join(" ") + '" style="--c:' + esc(e.day.color) + '">' + esc(label) + "</div>",
-          iconSize: [30, 30],
-          iconAnchor: [15 - shift, 15],
-          popupAnchor: [shift, -14]
+        markersById[p.id] = map.addMarker({
+          lat: p.lat, lng: p.lng, shift: shift, classes: cls, color: esc(e.day.color),
+          label: String(label), labelHtml: esc(label), title: p.name,
+          zIndex: p.id === state.placeId ? 1000 : (p.kind === "transit" ? -100 : 0),
+          popupHtml: popupHtml(e, g.length > 1),
+          onClick: function () { selectPlace(p.id, { from: "map" }); }
         });
-        var m = L.marker([p.lat, p.lng], {
-          icon: icon, title: p.name, alt: p.name, keyboard: true,
-          zIndexOffset: p.id === state.placeId ? 1000 : (p.kind === "transit" ? -100 : 0)
-        });
-        m.bindPopup(popupHtml(e, g.length > 1), { maxWidth: 260, autoPanPadding: [20, 60] });
-        m.on("click", function () { selectPlace(p.id, { from: "map" }); });
-        m.addTo(markerLayer);
-        markersById[p.id] = m;
         bounds.push([p.lat, p.lng]);
       });
     });
@@ -160,9 +177,7 @@
         // 연속 중복 좌표 제거
         pts = pts.filter(function (pt, i) { return i === 0 || pt[0] !== pts[i - 1][0] || pt[1] !== pts[i - 1][1]; });
         if (pts.length < 2) return;
-        L.polyline(pts, { color: d.color, weight: 3, opacity: 0.75, dashArray: "6 8", interactive: true })
-          .bindTooltip(esc(d.label) + " 방문 순서 직선 연결 — 실제 이동 경로 아님", { sticky: true, className: "line-label" })
-          .addTo(lineLayer);
+        map.addLine(pts, d.color, esc(d.label) + " 방문 순서 직선 연결 — 실제 이동 경로 아님");
       });
     }
 
@@ -171,10 +186,8 @@
   }
 
   function fitTo(bounds) {
-    if (!bounds || !bounds.length) return;
-    map.invalidateSize(false);
-    if (bounds.length === 1) { map.setView(bounds[0], 15); return; }
-    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
+    if (!bounds || !bounds.length || !map) return;
+    map.fit(bounds);
   }
   function currentBounds() {
     var b = [];
@@ -377,7 +390,7 @@
     var p = hit.place;
     if (hasCoord(p) && markersById[id]) {
       var target = Math.max(map.getZoom(), p.kind === "transit" && p.precision === "reference" ? 12 : 15);
-      if (opts.from !== "map") map.flyTo([p.lat, p.lng], Math.min(target, 16), { duration: 0.6 });
+      if (opts.from !== "map") map.flyTo([p.lat, p.lng], Math.min(target, 16));
       setTimeout(function () { if (markersById[id]) markersById[id].openPopup(); }, opts.from === "map" ? 0 : 650);
     }
     if (opts.from !== "map" && isMobile()) {
@@ -536,6 +549,11 @@
       }
       if (e.key === "Escape") { this.value = ""; state.query = ""; renderPlaces(); renderMap(false); }
     });
+    $("btn-provider").addEventListener("click", function () {
+      var next = mapProvider === "google" ? "osm" : "google";
+      storageSet(PROVIDER_KEY, next);
+      setProvider(next, false);
+    });
     $("btn-fit").addEventListener("click", function () { map.closePopup(); fitTo(currentBounds()); });
     $("btn-lines").addEventListener("click", function () {
       state.showLines = !state.showLines;
@@ -561,7 +579,7 @@
         if (!el.clientWidth || !el.clientHeight) return;
         var refit = !lastW || Math.abs(el.clientWidth - lastW) > 40 || Math.abs(el.clientHeight - lastH) > 40;
         lastW = el.clientWidth; lastH = el.clientHeight;
-        map.invalidateSize(false);
+        map.invalidate();
         if (refit && !state.placeId) fitTo(currentBounds());
       }, 150);
     }
@@ -583,21 +601,20 @@
       } catch (e) { /* ignore */ }
     }
     readHash();
-    if (typeof L === "undefined") {
-      $("map").innerHTML = "<p style='padding:16px'>지도 라이브러리를 불러오지 못했습니다. 일정 목록은 아래에서 볼 수 있습니다.</p>";
-      map = { closePopup: function () {}, getZoom: function () { return 0; }, flyTo: function () {}, invalidateSize: function () {} };
-      markerLayer = lineLayer = { clearLayers: function () {} };
-      renderMap = function () {};
-    } else {
-      initMap();
-    }
+    map = NO_MAP;
     renderStatic();
     bind();
-    renderAll(true);
-    if (state.placeId) selectPlace(state.placeId, { from: "map" });
+    renderAll(false);
+    var pref = storageGet(PROVIDER_KEY);
+    var want = window.TripMap && window.TripMap.hasGoogleKey && pref !== "osm" ? "google" : "osm";
+    setProvider(want, false);
+    document.addEventListener("trip-map-auth-failure", function () {
+      if (mapProvider === "google") { toast("구글 지도 키 인증에 실패해 OpenStreetMap으로 전환합니다."); setProvider("osm", true); }
+    });
     window.__tripViewer = {
       state: state, selectPlace: selectPlace, setDay: setDay,
-      refresh: function () { if (map && map.invalidateSize) { map.invalidateSize(false); if (!state.placeId) fitTo(currentBounds()); } }
+      provider: function () { return mapProvider; },
+      refresh: function () { if (map) { map.invalidate(); if (!state.placeId) fitTo(currentBounds()); } }
     }; // 디버그·테스트용
   }
 
