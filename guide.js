@@ -7,6 +7,16 @@
   var VIEWS = ["transport", "budget", "wallet", "tickets", "food", "emergency"];
   var LEDGER_KEY = "haha-trip-ledger-v7";
   var SHEET_KEY = "haha-trip-sheet-v1";
+  // 한 번 누르는 연동 링크: #connect=<웹 앱 ID>.<비밀 코드> → 이 기기에 저장하고 주소창에서 지움
+  (function () {
+    var m = /^#connect=([A-Za-z0-9_-]{20,})\.([^&\/]+)$/.exec(location.hash);
+    if (!m) return;
+    try {
+      window.localStorage.setItem(SHEET_KEY, JSON.stringify({ url: "https://script.google.com/macros/s/" + m[1] + "/exec", token: decodeURIComponent(m[2]) }));
+      window.__sheetConnected = true;
+    } catch (e) { /* 저장 불가 */ }
+    history.replaceState(null, "", location.pathname + "#budget");
+  })();
   var CHECK_KEY = "haha-trip-checklist-v1";
   var G = window.GUIDE_DATA || { views: {}, budget: null };
 
@@ -319,7 +329,7 @@
       '<button type="submit" class="btn primary">저장 · 연결 확인</button>' +
       '<button type="button" class="btn" id="lg-sync-all">안 보낸 지출 보내기</button>' +
       '<button type="button" class="btn" id="lg-sheet-off">연동 끄기</button></form>' +
-      '<p id="lg-sheet-status" class="g-note">' + (cfg ? "연동됨 · 이 기기에만 저장되어 있습니다." : "연동 안 됨") + '</p>' +
+      '<p id="lg-sheet-status" class="g-note">' + (window.__sheetConnected ? "연동 링크로 설정했습니다. 이 기기에서 바로 쓸 수 있어요." : cfg ? "연동됨 · 이 기기에만 저장되어 있습니다." : "연동 안 됨") + '</p>' +
       '<p class="g-note">주소와 비밀 코드는 이 폰의 브라우저에만 저장되고 사이트에는 올라가지 않습니다. 뷰어에서 삭제하거나 결제자를 바꿔도 시트에는 반영되지 않으니 시트에서 직접 고쳐 주세요.</p></section>';
     h += '<section class="g-sec"><h3>사람별 결제 · 정산</h3><div id="lg-people"></div>' +
       '<p class="g-note">2인 항목은 반씩 나눠 부담하고, 1인 항목은 결제한 사람 몫으로 계산합니다. 결제자가 \'미지정\'인 항목은 정산에서 빠집니다.</p></section>';
