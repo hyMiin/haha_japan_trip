@@ -5,7 +5,7 @@
   "use strict";
 
   var VIEWS = ["transport", "budget", "wallet", "tickets", "food", "emergency"];
-  var LEDGER_KEY = "haha-trip-ledger-v3";
+  var LEDGER_KEY = "haha-trip-ledger-v4";
   var CHECK_KEY = "haha-trip-checklist-v1";
   var G = window.GUIDE_DATA || { views: {}, budget: null };
 
@@ -179,7 +179,8 @@
         return {
           id: String(e.id || Math.random().toString(36).slice(2)), day: String(e.day || ""), cat: String(e.cat || ""),
           desc: String(e.desc || ""), amount: +e.amount, currency: e.currency === "KRW" ? "KRW" : "JPY",
-          method: String(e.method || ""), split: e.split === "1인" ? "1인" : "2인"
+          method: String(e.method || ""), split: e.split === "1인" ? "1인" : "2인",
+          payer: typeof e.payer === "string" ? e.payer : ""
         };
       });
     }
@@ -191,6 +192,13 @@
   }
   function won(n) { return n == null ? "–" : Math.round(n).toLocaleString("ko-KR") + "원"; }
   function yen(n) { return Math.round(n).toLocaleString("ko-KR") + "엔"; }
+
+  function people() { return (G.budget && G.budget.people) || ["하이민", "하보로"]; }
+  function payerSelect(attr, val) {
+    return '<select ' + attr + ' aria-label="결제자"><option value="">미지정</option>' + people().map(function (p) {
+      return '<option' + (p === val ? " selected" : "") + ">" + esc(p) + "</option>";
+    }).join("") + "</select>";
+  }
 
   function renderBudget() {
     var b = G.budget || {};
@@ -212,8 +220,11 @@
       '<label>통화<select name="currency"><option value="JPY">엔</option><option value="KRW">원</option></select></label>' +
       '<label>결제수단<select name="method">' + methods.map(function (m) { return "<option>" + esc(m) + "</option>"; }).join("") + "</select></label>" +
       '<label>구분<select name="split"><option>2인</option><option>1인</option></select></label>' +
+      '<label>결제자' + payerSelect('name="payer"', "") + "</label>" +
       '<button type="submit" class="btn primary">추가</button></form></section>';
-    h += '<section class="g-sec"><h3>지출 내역</h3><div class="g-table-wrap"><table class="g-table"><thead><tr><th>날짜</th><th>항목</th><th>내용</th><th>엔화</th><th>원화 환산</th><th>결제수단</th><th>1인/2인</th><th></th></tr></thead><tbody id="lg-exp-body"></tbody></table></div></section>';
+    h += '<section class="g-sec"><h3>지출 내역</h3><div class="g-table-wrap"><table class="g-table"><thead><tr><th>날짜</th><th>항목</th><th>내용</th><th>엔화</th><th>원화 환산</th><th>결제수단</th><th>1인/2인</th><th>결제자</th><th></th></tr></thead><tbody id="lg-exp-body"></tbody></table></div></section>';
+    h += '<section class="g-sec"><h3>사람별 결제 · 정산</h3><div id="lg-people"></div>' +
+      '<p class="g-note">2인 항목은 반씩 나눠 부담하고, 1인 항목은 결제한 사람 몫으로 계산합니다. 결제자가 \'미지정\'인 항목은 정산에서 빠집니다.</p></section>';
     if (b.estimates) h += '<section class="g-sec"><h3>' + fmt(b.estimates.title) + "</h3>" + b.estimates.blocks.map(block).join("") + "</section>";
     return h + "</div>";
   }
@@ -249,8 +260,40 @@
       return '<tr><td data-label="날짜">' + esc(e.day) + '</td><td data-label="항목">' + esc(catLabel[e.cat] || e.cat) + '</td><td data-label="내용">' + esc(e.desc) +
         '</td><td data-label="엔화">' + (e.currency === "JPY" ? yen(e.amount) : "–") + '</td><td data-label="원화 환산">' + won(k) +
         '</td><td data-label="결제수단">' + esc(e.method) + '</td><td data-label="1인/2인">' + esc(e.split) +
+        '</td><td data-label="결제자">' + payerSelect('data-payer="' + esc(e.id) + '"', e.payer) +
         '</td><td><button type="button" class="btn sm" data-del="' + esc(e.id) + '" aria-label="삭제">삭제</button></td></tr>';
-    }).join("") : '<tr><td colspan="8" class="g-note">아직 입력한 지출이 없습니다.</td></tr>';
+    }).join("") : '<tr><td colspan="9" class="g-note">아직 입력한 지출이 없습니다.</td></tr>';
+    renderPeople();
+  }
+
+  function renderPeople() {
+    var el = $("lg-people");
+    if (!el) return;
+    var ps = people();
+    var stat = {}, unassigned = 0, unassignedKRW = 0, noRate = 0;
+    ps.forEach(function (p) { stat[p] = { n: 0, paid: 0, share: 0 }; });
+    ledger.expenses.forEach(function (e) {
+      var k = toKRW(e);
+      if (k == null) { noRate++; return; }
+      if (!e.payer || !stat[e.payer]) { unassigned++; unassignedKRW += k; return; }
+      stat[e.payer].n++; stat[e.payer].paid += k;
+      if (e.split === "1인") stat[e.payer].share += k;
+      else ps.forEach(function (p) { stat[p].share += k / ps.length; });
+    });
+    var h = '<div class="g-table-wrap"><table class="g-table"><thead><tr><th>사람</th><th>결제 건수</th><th>결제한 금액</th><th>부담할 금액</th><th>차액</th></tr></thead><tbody>' +
+      ps.map(function (p) {
+        var s = stat[p], d = s.paid - s.share;
+        return '<tr><td data-label="사람">' + esc(p) + '</td><td data-label="결제 건수">' + s.n + '건</td><td data-label="결제한 금액">' + won(s.paid) + '</td><td data-label="부담할 금액">' + won(s.share) + '</td><td data-label="차액" class="' + (d < 0 ? "neg" : "pos") + '">' + (d >= 0 ? "+" : "") + won(d) + "</td></tr>";
+      }).join("") + "</tbody></table></div>";
+    if (ps.length === 2) {
+      var a = ps[0], b = ps[1], diff = stat[a].paid - stat[a].share;
+      h += '<div class="budget-total">' + (Math.round(diff) === 0 ? "정산할 금액이 없습니다." :
+        diff > 0 ? "<strong>" + esc(b) + " → " + esc(a) + " " + won(diff) + "</strong> 보내면 정산 끝" :
+        "<strong>" + esc(a) + " → " + esc(b) + " " + won(-diff) + "</strong> 보내면 정산 끝") + "</div>";
+    }
+    if (unassigned) h += '<p class="g-note neg">결제자 미지정 ' + unassigned + "건(" + won(unassignedKRW) + ")은 정산에서 빠져 있습니다. 지출 내역에서 결제자를 골라 주세요.</p>";
+    if (noRate) h += '<p class="g-note neg">환율이 없어 계산하지 못한 엔화 지출 ' + noRate + "건</p>";
+    el.innerHTML = h;
   }
 
   /* ---------- events ---------- */
@@ -273,6 +316,12 @@
       }
     });
     gv.addEventListener("change", function (e) {
+      var pid = e.target.getAttribute("data-payer");
+      if (pid) {
+        ledger.expenses.forEach(function (x) { if (x.id === pid) x.payer = e.target.value; });
+        saveLedger(); renderPeople();
+        return;
+      }
       var c = e.target.getAttribute("data-check");
       if (c) {
         var saved = {};
@@ -305,7 +354,7 @@
       ledger.expenses.push({
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
         day: f.day.value, cat: f.cat.value, desc: f.desc.value.trim(), amount: amt,
-        currency: f.currency.value, method: f.method.value, split: f.split.value
+        currency: f.currency.value, method: f.method.value, split: f.split.value, payer: f.payer.value
       });
       saveLedger(); updateBudget();
       f.desc.value = ""; f.amount.value = "";
