@@ -203,7 +203,9 @@
   function saveLedger() { sset(LEDGER_KEY, JSON.stringify(ledger)); }
 
   /* ---------- 구글 시트 연동 ---------- */
-  function sheetCfg() { try { var c = JSON.parse(sget(SHEET_KEY) || "null"); return c && c.url && c.token ? c : null; } catch (e) { return null; } }
+  // 기본 연동 (사용자 요청으로 사이트에 고정 · 2026-11-12)
+  var SHEET_DEFAULT = { url: "https://script.google.com/macros/s/AKfycbxz5adisczBhrgDACTkhvfXrg2l2LIb8uGbMjvDhJvsxzTBsZ4svxW8hUNQm7Vs0kI/exec", token: "221023" };
+  function sheetCfg() { try { var c = JSON.parse(sget(SHEET_KEY) || "null"); return c && c.url && c.token ? c : SHEET_DEFAULT; } catch (e) { return SHEET_DEFAULT; } }
   function tripDay() {
     var d = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); // 일본/한국 시간 날짜
     return { "2026-11-14": "DAY 1", "2026-11-15": "DAY 2", "2026-11-16": "DAY 3" }[d] || (d < "2026-11-14" ? "출국 전" : "DAY 3");
@@ -236,7 +238,7 @@
   }
   function updateSheet(btn) {
     var cfg = sheetCfg();
-    if (!cfg) { setSheetStatus("구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.", true); return; }
+    if (!cfg) { setSheetStatus("구글 시트 연동 설정을 찾지 못했습니다.", true); return; }
     if (!window.confirm("지금 지출 내역 " + ledger.expenses.length + "건으로 시트의 결제 내역 표를 다시 씁니다.\n시트에서 직접 고친 내용은 덮어써집니다. 계속할까요?")) return;
     btn.disabled = true; btn.textContent = "업데이트 중…";
     post(cfg, { action: "replace", entries: ledger.expenses.map(payload) }).then(function (res) {
@@ -292,7 +294,7 @@
   }
   function sendPending() {
     var list = ledger.expenses.filter(function (e) { return e.sync !== "sent"; });
-    if (!sheetCfg()) { setSheetStatus("구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.", true); return; }
+    if (!sheetCfg()) { setSheetStatus("구글 시트 연동 설정을 찾지 못했습니다.", true); return; }
     if (!list.length) { setSheetStatus("보낼 지출이 없습니다."); return; }
     list.reduce(function (p, e) { return p.then(function () { return sendEntry(e); }); }, Promise.resolve());
   }
@@ -328,7 +330,7 @@
   function dayOf(date) { return { "2026-11-14": "DAY 1", "2026-11-15": "DAY 2", "2026-11-16": "DAY 3" }[date] || (date && date < "2026-11-14" ? "출국 전" : ""); }
   function readCapture(file) {
     var cfg = sheetCfg(), f = $("lg-form");
-    if (!cfg) { capMsg("구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.", true); return; }
+    if (!cfg) { capMsg("구글 시트 연동 설정을 찾지 못했습니다.", true); return; }
     capMsg("캡처를 읽는 중… (10~30초)");
     shrink(file).then(function (b64) {
       return post(cfg, { action: "extract", image: b64, mime: "image/jpeg" });
@@ -373,7 +375,7 @@
       '<button type="submit" class="btn primary">추가</button></form>' +
       '<p class="g-note">날짜는 오늘 기준(11/14 → DAY 1)으로, 예산 항목은 입력한 단어로 자동 분류하고, 둘이 나눠 내는 2인 항목으로 저장합니다. 1인 항목은 아래 내역에서 바꿀 수 있어요.' +
       "</p>" +
-      '<p id="lg-sheet-status" class="g-note' + (cfg ? "" : " neg") + '">' + (window.__sheetConnected ? "연동 링크로 설정했습니다. 추가하면 구글 시트에도 바로 들어갑니다." : cfg ? "추가하면 구글 시트에도 바로 들어갑니다." : "구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.") + "</p></section>";
+      '<p id="lg-sheet-status" class="g-note' + (cfg ? "" : " neg") + '">' + (window.__sheetConnected ? "연동 링크로 설정했습니다. 추가하면 구글 시트에도 바로 들어갑니다." : cfg ? "추가하면 구글 시트에도 바로 들어갑니다." : "구글 시트 연동 설정을 찾지 못했습니다.") + "</p></section>";
     h += '<section class="g-sec"><h3>지출 내역</h3><div class="g-table-wrap"><table class="g-table"><thead><tr><th>날짜</th><th>항목</th><th>내용</th><th>엔화</th><th>원화 환산</th><th>결제수단</th><th>1인/2인</th><th>결제자</th><th>시트</th><th></th></tr></thead><tbody id="lg-exp-body"></tbody></table></div></section>';
     h += '<section class="g-sec"><h3>사람별 결제 · 정산</h3><div id="lg-people"></div>' +
       '<p class="g-note">2인 항목은 반씩 나눠 부담하고, 1인 항목은 결제한 사람 몫으로 계산합니다. 결제자가 \'미지정\'인 항목은 정산에서 빠집니다.</p></section>';
