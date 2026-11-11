@@ -860,11 +860,11 @@ window.GUIDE_DATA = {
     paid: [
       { id: "paid-stay1", day: "출국 전", cat: "stay", desc: "Gora Onsen Kinkaku 1박 (Agoda 1790188381, Spa Tax 포함)", amount: 160821, currency: "KRW", method: "기타", split: "2인", payer: "하보로" },
       { id: "paid-stay2", day: "출국 전", cat: "stay", desc: "신주쿠 숙소 1박 (Agoda 1790203934, Visa)", amount: 141935, currency: "KRW", method: "기타", split: "2인", payer: "하보로" },
-      { id: "paid-pass1", day: "출국 전", cat: "transport", desc: "디지털 오와쿠다니 패스 1장 (신주쿠 출발 2일)", amount: 6480, currency: "JPY", method: "기타", split: "1인", payer: "" },
-      { id: "paid-rc1", day: "출국 전", cat: "transport", desc: "로망스카 특급권 11/14 14:20 · 2명", amount: 2300, currency: "JPY", method: "기타", split: "2인", payer: "" },
-      { id: "paid-rc2", day: "출국 전", cat: "transport", desc: "로망스카 특급권 11/15 14:16 · 2명", amount: 2300, currency: "JPY", method: "기타", split: "2인", payer: "" }
+      { id: "paid-pass1", day: "출국 전", cat: "transport", desc: "디지털 오와쿠다니 패스 1장 (신주쿠 출발 2일, 6,480엔 · 11/11 11:57 출금)", amount: 56082, currency: "KRW", method: "SOL트래블 카드", split: "1인", payer: "하이민" },
+      { id: "paid-rc1", day: "출국 전", cat: "transport", desc: "로망스카 특급권 11/14 신주쿠 14:20 · 2명 (2,300엔 · 11/11 12:07 출금)", amount: 19889, currency: "KRW", method: "SOL트래블 카드", split: "2인", payer: "하이민" },
+      { id: "paid-rc2", day: "출국 전", cat: "transport", desc: "로망스카 특급권 11/15 하코네유모토 14:16 · 2명 (2,300엔 · 11/11 12:09 출금)", amount: 19889, currency: "KRW", method: "SOL트래블 카드", split: "2인", payer: "하이민" }
     ],
-    methods: ["SOL트래블 실물 카드", "엔화 현금", "교통카드(Suica/PASMO)", "Apple Pay", "Samsung Wallet", "기타"],
+    methods: ["SOL트래블 카드", "SOL트래블 실물 카드", "엔화 현금", "교통카드(Suica/PASMO)", "Apple Pay", "Samsung Wallet", "기타"],
     estimates: {
       title: "교통비 예상 (확정한 방식 기준, 2인)",
       blocks: [

@@ -5,7 +5,7 @@
   "use strict";
 
   var VIEWS = ["transport", "budget", "wallet", "tickets", "food", "emergency"];
-  var LEDGER_KEY = "haha-trip-ledger-v4";
+  var LEDGER_KEY = "haha-trip-ledger-v5";
   var CHECK_KEY = "haha-trip-checklist-v1";
   var G = window.GUIDE_DATA || { views: {}, budget: null };
 
