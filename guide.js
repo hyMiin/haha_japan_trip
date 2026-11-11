@@ -305,7 +305,7 @@
     var methods = b.methods || ["SOL트래블 실물 카드", "Apple Pay", "Suica/PASMO", "현금(엔)", "기타"];
     var days = ["출국 전", "DAY 1", "DAY 2", "DAY 3"];
     var h = '<div class="g-inner"><header class="g-head"><h2>여행 예산표 · 2인 합산 ' + won(ledger.totalKRW) + "</h2>" +
-      "<p>" + fmt(b.intro || "") + "</p></header>";
+      (b.intro ? "<p>" + fmt(b.intro) + "</p>" : "") + "</header>";
     h += '<section class="g-sec"><h3>환율</h3><div class="budget-rate"><label for="lg-rate">100엔 =</label>' +
       '<input id="lg-rate" type="number" inputmode="decimal" min="0" step="0.01" value="' + (ledger.krwPer100Yen || "") + '" placeholder="직접 입력"><span>원</span></div>' +
       (b.rateNote ? '<p class="g-note">' + fmt(b.rateNote) + "</p>" : "") + "</section>";
