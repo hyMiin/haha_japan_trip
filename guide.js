@@ -263,9 +263,9 @@
     var cfg = sheetCfg();
     h += '<section class="g-sec"><h3>지출 입력</h3><form id="lg-form" class="lg-form" autocomplete="off">' +
       '<label>결제자' + payerSelect('name="payer" required', people()[0]) + "</label>" +
-      '<label class="wide">항목<input name="desc" list="lg-items" placeholder="예: 저녁 · 스이카 충전 · 돈키호테" required></label>' +
+      '<label class="wide">내용 / 사용처<input name="desc" list="lg-items" placeholder="예: 저녁 · 스이카 충전 · 돈키호테" required></label>' +
       '<datalist id="lg-items"><option>점심</option><option>저녁</option><option>간식·카페</option><option>편의점</option><option>교통</option><option>스이카 충전</option><option>돈키호테</option><option>기념품</option></datalist>' +
-      '<label>금액(원)<input name="amount" type="number" inputmode="numeric" min="0" step="1" required></label>' +
+      '<label>결제금액(원)<input name="amount" type="number" inputmode="numeric" min="0" step="1" required></label>' +
       '<button type="submit" class="btn primary">추가</button></form>' +
       '<p class="g-note">날짜는 오늘 기준(11/14 → DAY 1)으로, 예산 항목은 입력한 단어로 자동 분류하고, 둘이 나눠 내는 2인 항목으로 저장합니다. 1인 항목은 아래 내역에서 바꿀 수 있어요.' +
       (cfg ? " 추가하면 구글 시트에도 바로 들어갑니다." : " 구글 시트 연동은 아래에서 설정하세요.") + "</p></section>";
