@@ -329,7 +329,7 @@
   function readCapture(file) {
     var cfg = sheetCfg(), f = $("lg-form");
     if (!cfg) { capMsg("구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.", true); return; }
-    capMsg("캡처를 읽는 중… (5~15초)");
+    capMsg("캡처를 읽는 중… (10~30초)");
     shrink(file).then(function (b64) {
       return post(cfg, { action: "extract", image: b64, mime: "image/jpeg" });
     }).then(function (res) {
