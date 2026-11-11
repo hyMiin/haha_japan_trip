@@ -846,8 +846,8 @@ window.GUIDE_DATA = {
   budget: {
     totalKRW: 700000,
     krwPer100Yen: 859.02,
-    people: ["하이민", "하보로"],
-    intro: "2인 합산, 왕복 항공권 제외. 숙박비는 실제 결제액(302,756원)으로, 교통비는 확정한 방식 기준 추정치로 계획을 맞추고 남는 금액을 돈키호테·예비비에 나눴습니다(2026-11-11). 이미 결제한 숙소·오와쿠다니 패스 1장·로망스카 특급권은 지출 내역에 미리 넣어 두었습니다(숙소 2건 결제자: 하보로 — 드라이브 「하하커플_4주년_일본여행사용내역」 시트·사용자 확인 기준). 모든 값은 직접 바꿀 수 있고 이 브라우저에 저장됩니다.",
+    people: ["하이민", "하보"],
+    intro: "2인 합산, 왕복 항공권 제외. 숙박비는 실제 결제액(302,756원)으로, 교통비는 확정한 방식 기준 추정치로 계획을 맞추고 남는 금액을 돈키호테·예비비에 나눴습니다(2026-11-11). 이미 결제한 숙소·오와쿠다니 패스 1장·로망스카 특급권은 지출 내역에 미리 넣어 두었습니다(숙소 2건 결제자: 하보 — 드라이브 「하하커플_4주년_일본여행사용내역」 시트·사용자 확인 기준). 모든 값은 직접 바꿀 수 있고 이 브라우저에 저장됩니다.",
     rateNote: "기본값 100엔 = 859.02원은 2026-11-06 15:30 하나은행 매매기준율(철강금속신문 보도, 2차)입니다. 실제 결제·환전 환율로 바꿔 넣으세요.",
     planNote: "숙박 302,756 + 교통 210,000 + 식사 150,000 = 662,756원 → 돈키호테·예비비로 37,244원이 남습니다. 쇼핑·예비비를 지키려면 총예산을 75만~80만 원으로 올리는 것도 방법입니다.",
     categories: [
@@ -858,8 +858,8 @@ window.GUIDE_DATA = {
       { id: "etc", label: "관광·기타·예비비", planKRW: 12244 }
     ],
     paid: [
-      { id: "paid-stay1", day: "출국 전", cat: "stay", desc: "Gora Onsen Kinkaku 1박 (Agoda 1790188381, Spa Tax 포함)", amount: 160821, currency: "KRW", method: "기타", split: "2인", payer: "하보로" },
-      { id: "paid-stay2", day: "출국 전", cat: "stay", desc: "신주쿠 숙소 1박 (Agoda 1790203934, Visa)", amount: 141935, currency: "KRW", method: "기타", split: "2인", payer: "하보로" },
+      { id: "paid-stay1", day: "출국 전", cat: "stay", desc: "Gora Onsen Kinkaku 1박 (Agoda 1790188381, Spa Tax 포함)", amount: 160821, currency: "KRW", method: "기타", split: "2인", payer: "하보" },
+      { id: "paid-stay2", day: "출국 전", cat: "stay", desc: "신주쿠 숙소 1박 (Agoda 1790203934, Visa)", amount: 141935, currency: "KRW", method: "기타", split: "2인", payer: "하보" },
       { id: "paid-pass1", day: "출국 전", cat: "transport", desc: "디지털 오와쿠다니 패스 1장 (신주쿠 출발 2일, 6,480엔 · 11/11 11:57 출금)", amount: 56082, currency: "KRW", method: "SOL트래블 카드", split: "1인", payer: "하이민" },
       { id: "paid-rc1", day: "출국 전", cat: "transport", desc: "로망스카 특급권 11/14 신주쿠 14:20 · 2명 (2,300엔 · 11/11 12:07 출금)", amount: 19889, currency: "KRW", method: "SOL트래블 카드", split: "2인", payer: "하이민" },
       { id: "paid-rc2", day: "출국 전", cat: "transport", desc: "로망스카 특급권 11/15 하코네유모토 14:16 · 2명 (2,300엔 · 11/11 12:09 출금)", amount: 19889, currency: "KRW", method: "SOL트래블 카드", split: "2인", payer: "하이민" }

@@ -5,7 +5,7 @@
   "use strict";
 
   var VIEWS = ["transport", "budget", "wallet", "tickets", "food", "emergency"];
-  var LEDGER_KEY = "haha-trip-ledger-v5";
+  var LEDGER_KEY = "haha-trip-ledger-v6";
   var CHECK_KEY = "haha-trip-checklist-v1";
   var G = window.GUIDE_DATA || { views: {}, budget: null };
 
@@ -193,7 +193,7 @@
   function won(n) { return n == null ? "–" : Math.round(n).toLocaleString("ko-KR") + "원"; }
   function yen(n) { return Math.round(n).toLocaleString("ko-KR") + "엔"; }
 
-  function people() { return (G.budget && G.budget.people) || ["하이민", "하보로"]; }
+  function people() { return (G.budget && G.budget.people) || ["하이민", "하보"]; }
   function payerSelect(attr, val) {
     return '<select ' + attr + ' aria-label="결제자"><option value="">미지정</option>' + people().map(function (p) {
       return '<option' + (p === val ? " selected" : "") + ">" + esc(p) + "</option>";
