@@ -168,7 +168,7 @@
       totalKRW: b.totalKRW || 700000,
       krwPer100Yen: typeof b.krwPer100Yen === "number" ? b.krwPer100Yen : null,
       categories: clone(b.categories || []),
-      expenses: clone(b.paid || [])
+      expenses: clone(b.paid || []).map(function (e) { e.sync = "sent"; return e; }) // 미리 넣은 결제는 시트에 이미 있음
     };
   }
   function loadLedger() {
