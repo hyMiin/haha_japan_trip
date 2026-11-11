@@ -19,7 +19,7 @@ const TOKEN = '여기에-비밀코드';          // ← 꼭 바꾸세요
 const SHEET_NAME = '여행 경비';
 const PEOPLE = ['하이민', '하보'];
 const COLS = 10;                            // A:J
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 const GEMINI_KEY = '';                      // 비워 두면 스크립트 속성 GEMINI_KEY 사용
 
 function doGet() {
