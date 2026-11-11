@@ -222,16 +222,39 @@
     return fetch(cfg.url, { method: "POST", body: JSON.stringify(body) }) // text/plain → 사전요청 없음
       .then(function (r) { return r.json(); });
   }
+  var SHEET_CAT = { stay: "숙소", transport: "교통", food: "식비", donki: "쇼핑", etc: "기타" };
+  function payload(e) {
+    var k = toKRW(e), ov = ((G.budget && G.budget.paid) || []).filter(function (p) { return p.id === e.id; })[0];
+    ov = (ov && ov.sheet) || {};
+    return {
+      id: e.id, day: sheetDay(e.day), cat: SHEET_CAT[e.cat] || e.cat, desc: ov.desc || e.desc, payer: e.payer, split: e.split,
+      method: ov.method != null ? ov.method : (e.method || ""), krw: k == null ? 0 : Math.round(k),
+      jpy: e.currency === "JPY" ? e.amount : (e.jpy || ""), resv: ov.resv || "", jpyRef: ov.jpyRef || "",
+      memo: ov.note != null ? ov.note : (e.viaImage ? "캡처 입력" + (e.date ? " · " + e.date : "") : "뷰어 입력")
+    };
+  }
+  function updateSheet(btn) {
+    var cfg = sheetCfg();
+    if (!cfg) { setSheetStatus("구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.", true); return; }
+    if (!window.confirm("지금 지출 내역 " + ledger.expenses.length + "건으로 시트의 결제 내역 표를 다시 씁니다.\n시트에서 직접 고친 내용은 덮어써집니다. 계속할까요?")) return;
+    btn.disabled = true; btn.textContent = "업데이트 중…";
+    post(cfg, { action: "replace", entries: ledger.expenses.map(payload) }).then(function (res) {
+      if (!res || !res.ok) throw new Error((res && res.error) || "응답 없음");
+      ledger.expenses.forEach(function (x) { x.sync = "sent"; });
+      saveLedger(); updateBudget();
+      setSheetStatus("시트를 업데이트했습니다 (" + res.rows + "건).");
+      btn.textContent = "✓ 업데이트 완료";
+    }).catch(function (err) {
+      setSheetStatus("시트 업데이트 실패: " + err.message, true);
+      btn.textContent = "업데이트 실패 · 다시";
+    }).then(function () { btn.disabled = false; setTimeout(function () { btn.textContent = "⟳ 시트 업데이트"; }, 2500); });
+  }
   function sendEntry(e) {
     var cfg = sheetCfg();
     if (!cfg) return Promise.resolve(false);
     var k = toKRW(e);
-    var catLabel = (ledger.categories.filter(function (c) { return c.id === e.cat; })[0] || {}).label || e.cat;
     e.sync = "sending"; updateBudget();
-    return post(cfg, { action: "add", entry: {
-      id: e.id, day: sheetDay(e.day), cat: catLabel, desc: e.desc, payer: e.payer, split: e.split,
-      method: e.method || "", krw: k == null ? 0 : Math.round(k), jpy: e.currency === "JPY" ? e.amount : (e.jpy || ""), memo: e.viaImage ? "캡처 입력" + (e.date ? " · " + e.date : "") : "뷰어 입력"
-    } }).then(function (res) {
+    return post(cfg, { action: "add", entry: payload(e) }).then(function (res) {
       e.sync = res && res.ok ? "sent" : "fail";
       if (!(res && res.ok)) setSheetStatus("시트 추가 실패: " + ((res && res.error) || "응답 없음"), true);
       else setSheetStatus("시트에 추가했습니다" + (res.duplicate ? " (이미 있던 항목)" : "") + ".");
@@ -329,6 +352,7 @@
     h += '<section class="g-sec"><h3>사람별 결제 · 정산</h3><div id="lg-people"></div>' +
       '<p class="g-note">2인 항목은 반씩 나눠 부담하고, 1인 항목은 결제한 사람 몫으로 계산합니다. 결제자가 \'미지정\'인 항목은 정산에서 빠집니다.</p></section>';
     if (b.estimates) h += '<section class="g-sec"><h3>' + fmt(b.estimates.title) + "</h3>" + b.estimates.blocks.map(block).join("") + "</section>";
+    if (cfg) h += '<button type="button" class="btn primary lg-fab" id="lg-update">⟳ 시트 업데이트</button>';
     return h + "</div>";
   }
 
@@ -412,6 +436,8 @@
         if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
+      var ub = e.target.closest("#lg-update");
+      if (ub) { updateSheet(ub); return; }
       var rs = e.target.closest("[data-resend]");
       if (rs) { var rid = rs.getAttribute("data-resend"); ledger.expenses.forEach(function (x) { if (x.id === rid) sendEntry(x); }); return; }
       if (e.target.id === "lg-sync-all") { sendPending(); return; }

@@ -433,3 +433,5 @@ button { font: inherit; }
 .gm-pop b { font-size: 14px; }
 .lg-cap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 12px; }
 .lg-cap-btn { cursor: pointer; }
+.lg-fab { position: fixed; right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 1200; padding: 12px 18px; border-radius: 999px; box-shadow: 0 6px 18px rgba(31, 78, 121, .28); font-size: 15px; }
+.lg-fab:disabled { opacity: .7; }

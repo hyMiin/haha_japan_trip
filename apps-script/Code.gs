@@ -34,6 +34,7 @@ function doPost(e) {
     if (req.token !== TOKEN) return out({ ok: false, error: '비밀 코드가 맞지 않습니다' });
     if (req.action === 'ping') return out({ ok: true, capture: !!geminiKey() });
     if (req.action === 'extract') return out(extract(req.image, req.mime));
+    if (req.action === 'replace') return out(replaceAll(req.entries));
     if (req.action !== 'add' || !req.entry) return out({ ok: false, error: '알 수 없는 요청' });
     return out(addEntry(req.entry));
   } catch (err) {
@@ -52,15 +53,9 @@ function addEntry(x) {
   const sh = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
   if (!sh) return { ok: false, error: '「' + SHEET_NAME + '」 탭을 찾지 못했습니다' };
 
-  // 결제 내역 표: A='일차' 이고 C='내용 / 사용처' 인 머리행 ~ 그 아래 첫 A='합계' 행
-  const vals = sh.getRange(1, 1, sh.getLastRow(), 3).getDisplayValues();
-  let head = -1, total = -1;
-  for (let i = 0; i < vals.length; i++) {
-    if (head < 0) {
-      if (vals[i][0] === '일차' && vals[i][2] === '내용 / 사용처') head = i + 1;
-    } else if (vals[i][0] === '합계') { total = i + 1; break; }
-  }
-  if (head < 0 || total < 0) return { ok: false, error: '시트에서 결제 내역 표(머리행·합계 행)를 찾지 못했습니다' };
+  const tb = findTable(sh);
+  if (!tb) return { ok: false, error: '시트에서 결제 내역 표(머리행·합계 행)를 찾지 못했습니다' };
+  const head = tb.head, total = tb.total;
 
   const first = head + 1;
   const last = total - 1;                    // 현재 마지막 데이터 행
@@ -72,17 +67,29 @@ function addEntry(x) {
   if (last > first) sh.getRange(first, 1, 1, COLS).copyTo(sh.getRange(last, 1, 1, COLS), { formatOnly: true });
   sh.setRowHeight(r, sh.getRowHeight(first));
 
-  const krw = Math.round(Number(x.krw) || 0);
-  const jpy = x.jpy ? 'JPY ' + Math.round(Number(x.jpy)).toLocaleString('en-US') : '';
-  sh.getRange(r, 1, 1, COLS).setValues([[
-    String(x.day || ''), String(x.cat || ''), String(x.desc || ''), String(x.payer || ''),
-    x.split === '1인' ? '1인' : '2인', String(x.method || ''), krw, '', jpy, String(x.memo || '')
-  ]]);
+  sh.getRange(r, 1, 1, COLS).setValues([rowOf(x)]);
 
-  // 합계·정산 수식의 범위를 새 행까지 넓힘
-  const t = r + 1;
-  const G = '$G$' + first + ':$G$' + r, D = '$D$' + first + ':$D$' + r, E = '$E$' + first + ':$E$' + r;
-  sh.getRange(t, 7).setFormula('=SUM(G' + first + ':G' + r + ')');
+  fixFormulas(sh, first, r);
+
+  props.setProperty('id_' + id, String(r));
+  return { ok: true, row: r };
+}
+
+// 결제 내역 표 위치: A='일차' 이고 C='내용 / 사용처' 인 머리행 ~ 그 아래 첫 A='합계' 행
+function findTable(sh) {
+  const vals = sh.getRange(1, 1, sh.getLastRow(), 3).getDisplayValues();
+  let head = -1, total = -1;
+  for (let i = 0; i < vals.length; i++) {
+    if (head < 0) { if (vals[i][0] === '일차' && vals[i][2] === '내용 / 사용처') head = i + 1; }
+    else if (vals[i][0] === '합계') { total = i + 1; break; }
+  }
+  return head < 0 || total < 0 ? null : { head: head, total: total };
+}
+
+function fixFormulas(sh, first, last) {
+  const t = last + 1;
+  const G = '$G$' + first + ':$G$' + last, D = '$D$' + first + ':$D$' + last, E = '$E$' + first + ':$E$' + last;
+  sh.getRange(t, 7).setFormula('=SUM(G' + first + ':G' + last + ')');
   const below = sh.getRange(t + 1, 1, Math.max(1, sh.getLastRow() - t), 1).getDisplayValues();
   below.forEach(function (row, i) {
     if (PEOPLE.indexOf(row[0]) === -1) return;
@@ -93,9 +100,36 @@ function addEntry(x) {
       '=C' + p + '-D' + p
     ]]);
   });
+}
 
-  props.setProperty('id_' + id, String(r));
-  return { ok: true, row: r };
+function rowOf(x) {
+  return [String(x.day || ''), String(x.cat || ''), String(x.desc || ''), String(x.payer || ''),
+    x.split === '1인' ? '1인' : '2인', String(x.method || ''), Math.round(Number(x.krw) || 0),
+    String(x.resv || ''), x.jpyRef ? String(x.jpyRef) : (x.jpy ? 'JPY ' + Math.round(Number(x.jpy)).toLocaleString('en-US') : ''),
+    String(x.memo || '')];
+}
+
+// 뷰어 지출 내역 전체로 결제 내역 표를 다시 씀 (시트에서 직접 고친 내용은 덮어씀)
+function replaceAll(list) {
+  if (!Array.isArray(list)) return { ok: false, error: '목록이 없습니다' };
+  const sh = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
+  if (!sh) return { ok: false, error: '「' + SHEET_NAME + '」 탭을 찾지 못했습니다' };
+  const tb = findTable(sh);
+  if (!tb) return { ok: false, error: '시트에서 결제 내역 표(머리행·합계 행)를 찾지 못했습니다' };
+  const first = tb.head + 1, oldN = tb.total - first, n = Math.max(1, list.length);
+  if (n > oldN) sh.insertRowsAfter(tb.total - 1, n - oldN);
+  else if (n < oldN) sh.deleteRows(first + n, oldN - n);
+  const last = first + n - 1;
+  const rng = sh.getRange(first, 1, n, COLS);
+  sh.getRange(first, 1, 1, COLS).copyTo(rng, { formatOnly: true });
+  rng.setBorder(null, null, false, null, null, false);
+  sh.getRange(last, 1, 1, COLS).setBorder(null, null, true, null, null, null, '#bdc1c6', SpreadsheetApp.BorderStyle.SOLID);
+  sh.setRowHeights(first, n, sh.getRowHeight(first));
+  rng.setValues(list.length ? list.map(rowOf) : [['', '', '', '', '', '', '', '', '', '']]);
+  fixFormulas(sh, first, last);
+  const props = PropertiesService.getScriptProperties();
+  list.forEach(function (x) { if (x.id) props.setProperty('id_' + x.id, 'sync'); });
+  return { ok: true, rows: list.length };
 }
 
 function geminiKey() { return PropertiesService.getScriptProperties().getProperty('GEMINI_KEY') || GEMINI_KEY; }
