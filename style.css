@@ -431,3 +431,5 @@ button { font: inherit; }
 .g-place-meta { font-size: 13px; color: var(--muted); }
 .gm-pop { font-family: var(--font); font-size: 13px; line-height: 1.45; color: var(--ink); }
 .gm-pop b { font-size: 14px; }
+.lg-cap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 12px; }
+.lg-cap-btn { cursor: pointer; }

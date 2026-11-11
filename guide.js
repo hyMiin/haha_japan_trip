@@ -182,6 +182,7 @@
           desc: String(e.desc || ""), amount: +e.amount, currency: e.currency === "KRW" ? "KRW" : "JPY",
           method: String(e.method || ""), split: e.split === "1인" ? "1인" : "2인",
           payer: typeof e.payer === "string" ? e.payer : "",
+          jpy: typeof e.jpy === "number" ? e.jpy : null, date: typeof e.date === "string" ? e.date : "", viaImage: !!e.viaImage,
           sync: e.sync === "sent" || /^paid-/.test(String(e.id || "")) ? "sent" : (e.sync === "fail" ? "fail" : "")
         };
       });
@@ -217,7 +218,7 @@
     e.sync = "sending"; updateBudget();
     return post(cfg, { action: "add", entry: {
       id: e.id, day: sheetDay(e.day), cat: catLabel, desc: e.desc, payer: e.payer, split: e.split,
-      method: e.method || "", krw: k == null ? 0 : Math.round(k), jpy: e.currency === "JPY" ? e.amount : "", memo: "뷰어 입력"
+      method: e.method || "", krw: k == null ? 0 : Math.round(k), jpy: e.currency === "JPY" ? e.amount : (e.jpy || ""), memo: e.viaImage ? "캡처 입력" + (e.date ? " · " + e.date : "") : "뷰어 입력"
     } }).then(function (res) {
       e.sync = res && res.ok ? "sent" : "fail";
       if (!(res && res.ok)) setSheetStatus("시트 추가 실패: " + ((res && res.error) || "응답 없음"), true);
@@ -248,6 +249,45 @@
     }).join("") + "</select>";
   }
 
+  function capMsg(t, bad) { var el = $("lg-cap-msg"); if (el) { el.textContent = t; el.className = "g-note" + (bad ? " neg" : ""); } }
+  function shrink(file) {
+    return new Promise(function (res, rej) {
+      var img = new Image(), url = URL.createObjectURL(file);
+      img.onload = function () {
+        var m = 1400, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, m / Math.max(w, h));
+        var c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        res(c.toDataURL("image/jpeg", 0.85).split(",")[1]);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error("이미지를 열지 못했습니다")); };
+      img.src = url;
+    });
+  }
+  function dayOf(date) { return { "2026-11-14": "DAY 1", "2026-11-15": "DAY 2", "2026-11-16": "DAY 3" }[date] || (date && date < "2026-11-14" ? "출국 전" : ""); }
+  function readCapture(file) {
+    var cfg = sheetCfg(), f = $("lg-form");
+    if (!cfg) { capMsg("먼저 아래 '구글 시트 연동'에 웹 앱 주소와 비밀 코드를 저장하세요.", true); return; }
+    capMsg("캡처를 읽는 중… (5~15초)");
+    shrink(file).then(function (b64) {
+      return post(cfg, { action: "extract", image: b64, mime: "image/jpeg" });
+    }).then(function (res) {
+      if (!res || !res.ok) throw new Error((res && res.error) || "응답 없음");
+      var r = res.result || {}, rate = ledger.krwPer100Yen;
+      var krw = typeof r.krw === "number" && r.krw > 0 ? r.krw : (typeof r.jpy === "number" && rate ? r.jpy * rate / 100 : null);
+      if (r.desc) f.desc.value = r.desc;
+      if (krw) f.amount.value = Math.round(krw);
+      f.dataset.jpy = typeof r.jpy === "number" ? r.jpy : "";
+      f.dataset.date = r.date || "";
+      f.dataset.cat = ledger.categories.some(function (c) { return c.id === r.cat; }) ? r.cat : "";
+      f.dataset.cap = "1";
+      capMsg("읽은 내용: " + (r.desc || "사용처 모름") + " · " + (r.krw ? Math.round(r.krw).toLocaleString("ko-KR") + "원" : "") +
+        (r.jpy ? (r.krw ? " / " : "") + Math.round(r.jpy).toLocaleString("ko-KR") + "엔" + (r.krw ? "" : " → " + won(krw) + " (환율 " + rate + ")") : "") +
+        (r.date ? " · " + r.date : "") + " — 맞으면 '추가'를 누르세요." + (krw ? "" : " 금액을 읽지 못했어요. 직접 넣어 주세요."), !krw);
+      f.amount.focus();
+    }).catch(function (err) { capMsg("캡처를 읽지 못했습니다: " + err.message + " — 직접 입력해 주세요.", true); });
+  }
+
   function renderBudget() {
     var b = G.budget || {};
     var methods = b.methods || ["SOL트래블 실물 카드", "Apple Pay", "Suica/PASMO", "현금(엔)", "기타"];
@@ -261,7 +301,10 @@
       '<tfoot><tr><th>합계</th><td id="lg-plan-sum"></td><td id="lg-act-sum"></td><td id="lg-rem-sum"></td></tr></tfoot></table></div>' +
       '<p class="g-note" id="lg-plan-check"></p>' + (b.planNote ? '<p class="g-note">' + fmt(b.planNote) + "</p>" : "") + "</section>";
     var cfg = sheetCfg();
-    h += '<section class="g-sec"><h3>지출 입력</h3><form id="lg-form" class="lg-form" autocomplete="off">' +
+    h += '<section class="g-sec"><h3>지출 입력</h3>' +
+      '<div class="lg-cap"><label class="btn primary lg-cap-btn">📷 결제 캡처로 입력<input type="file" id="lg-cap" accept="image/*" hidden></label>' +
+      '<span class="g-note" id="lg-cap-msg">결제자를 고르고 카드 결제 알림·영수증 캡처를 올리면 내용과 금액을 채워 드려요. 확인 후 \'추가\'를 누르세요.</span></div>' +
+      '<form id="lg-form" class="lg-form" autocomplete="off">' +
       '<label>결제자' + payerSelect('name="payer" required', people()[0]) + "</label>" +
       '<label class="wide">내용 / 사용처<input name="desc" list="lg-items" placeholder="예: 저녁 · 스이카 충전 · 돈키호테" required></label>' +
       '<datalist id="lg-items"><option>점심</option><option>저녁</option><option>간식·카페</option><option>편의점</option><option>교통</option><option>스이카 충전</option><option>돈키호테</option><option>기념품</option></datalist>' +
@@ -376,6 +419,7 @@
       }
     });
     gv.addEventListener("change", function (e) {
+      if (e.target.id === "lg-cap") { var fl = e.target.files && e.target.files[0]; if (fl) readCapture(fl); e.target.value = ""; return; }
       var sid = e.target.getAttribute("data-split");
       if (sid) { ledger.expenses.forEach(function (x) { if (x.id === sid) x.split = e.target.value; }); saveLedger(); renderPeople(); return; }
       var pid = e.target.getAttribute("data-payer");
@@ -430,6 +474,13 @@
         day: tripDay(), cat: guessCat(desc), desc: desc, amount: Math.round(amt),
         currency: "KRW", method: "", split: "2인", payer: f.payer.value, sync: ""
       };
+      if (f.dataset.cap === "1") {
+        x.viaImage = true;
+        if (f.dataset.jpy) x.jpy = +f.dataset.jpy;
+        if (f.dataset.date) { x.date = f.dataset.date; x.day = dayOf(f.dataset.date) || x.day; }
+        if (f.dataset.cat) x.cat = f.dataset.cat;
+      }
+      f.dataset.cap = ""; f.dataset.jpy = ""; f.dataset.date = ""; f.dataset.cat = "";
       ledger.expenses.push(x);
       saveLedger(); updateBudget();
       f.desc.value = ""; f.amount.value = "";
