@@ -194,7 +194,7 @@
           desc: String(e.desc || ""), amount: +e.amount, currency: e.currency === "KRW" ? "KRW" : "JPY",
           method: String(e.method || ""), split: e.split === "1인" ? "1인" : "2인",
           payer: typeof e.payer === "string" ? e.payer : "",
-          jpy: typeof e.jpy === "number" ? e.jpy : null, date: typeof e.date === "string" ? e.date : "", viaImage: !!e.viaImage,
+          jpy: typeof e.jpy === "number" ? e.jpy : null, date: typeof e.date === "string" ? e.date : "", viaImage: !!e.viaImage, fromSheet: !!e.fromSheet, resv: String(e.resv || ""), jpyRef: String(e.jpyRef || ""), note: e.note != null ? String(e.note) : null,
           sync: e.sync === "sent" || /^paid-/.test(String(e.id || "")) ? "sent" : (e.sync === "fail" ? "fail" : "")
         };
       });
@@ -226,6 +226,7 @@
   function payload(e) {
     var k = toKRW(e), ov = ((G.budget && G.budget.paid) || []).filter(function (p) { return p.id === e.id; })[0];
     ov = (ov && ov.sheet) || {};
+    if (e.fromSheet) ov = { desc: e.desc, method: e.method, resv: e.resv, jpyRef: e.jpyRef, note: e.note };
     return {
       id: e.id, day: sheetDay(e.day), cat: SHEET_CAT[e.cat] || e.cat, desc: ov.desc || e.desc, payer: e.payer, split: e.split,
       method: ov.method != null ? ov.method : (e.method || ""), krw: k == null ? 0 : Math.round(k),
@@ -248,6 +249,31 @@
       setSheetStatus("시트 업데이트 실패: " + err.message, true);
       btn.textContent = "업데이트 실패 · 다시";
     }).then(function () { btn.disabled = false; setTimeout(function () { btn.textContent = "⟳ 시트 업데이트"; }, 2500); });
+  }
+  var CAT_OF = { "숙소": "stay", "숙박": "stay", "교통": "transport", "식비": "food", "식사": "food", "쇼핑": "donki", "돈키호테": "donki", "기타": "etc" };
+  function fromSheetRow(r) {
+    var cat = CAT_OF[r.cat] || ledger.categories.filter(function (c) { return c.label === r.cat; }).map(function (c) { return c.id; })[0] || guessCat(r.cat + " " + r.desc);
+    var m = /^(\d)일차$/.exec(r.day || ""), jm = /([\d,]+)/.exec(String(r.jpyRef || "").replace(/^[^\d]*/, ""));
+    return {
+      id: "s" + r.row + "-" + Math.random().toString(36).slice(2, 6), day: m ? "DAY " + m[1] : (r.day || ""), cat: cat, desc: r.desc || "",
+      amount: +r.krw || 0, currency: "KRW", method: r.method || "", split: r.split === "1인" ? "1인" : "2인", payer: r.payer || "",
+      sync: "sent", fromSheet: true, resv: r.resv || "", jpyRef: r.jpyRef || "", note: r.note || "",
+      jpy: /JPY/i.test(r.jpyRef || "") && jm ? +jm[1].replace(/,/g, "") : null
+    };
+  }
+  function loadFromSheet() {
+    var cfg = sheetCfg();
+    if (!cfg) return;
+    post(cfg, { action: "list" }).then(function (res) {
+      if (!res || !res.ok || !Array.isArray(res.rows)) throw new Error((res && res.error) || "응답 없음");
+      var pending = ledger.expenses.filter(function (e) { return e.sync !== "sent"; });
+      ledger.expenses = res.rows.map(fromSheetRow).concat(pending);
+      saveLedger();
+      if (currentView() === "budget") { renderView("budget"); }
+      setSheetStatus("구글 시트에서 불러왔습니다 (" + res.rows.length + "건" + (pending.length ? " · 아직 안 보낸 " + pending.length + "건 포함" : "") + ").");
+    }).catch(function (err) {
+      setSheetStatus("시트를 불러오지 못해 이 기기에 저장된 내역을 보여 줍니다 (" + err.message + ").", true);
+    });
   }
   function sendEntry(e) {
     var cfg = sheetCfg();
@@ -529,6 +555,7 @@
     loadLedger();
     bind();
     showView();
+    loadFromSheet();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else boot();

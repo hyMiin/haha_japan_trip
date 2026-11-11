@@ -36,6 +36,7 @@ function doPost(e) {
     if (req.action === 'ping') return out({ ok: true, capture: !!geminiKey() });
     if (req.action === 'extract') return out(extract(req.image, req.mime));
     if (req.action === 'replace') return out(replaceAll(req.entries));
+    if (req.action === 'list') return out(listAll());
     if (req.action !== 'add' || !req.entry) return out({ ok: false, error: '알 수 없는 요청' });
     return out(addEntry(req.entry));
   } catch (err) {
@@ -131,6 +132,26 @@ function replaceAll(list) {
   const props = PropertiesService.getScriptProperties();
   list.forEach(function (x) { if (x.id) props.setProperty('id_' + x.id, 'sync'); });
   return { ok: true, rows: list.length };
+}
+
+// 결제 내역 표 → 뷰어 (새로고침할 때 불러오기)
+function listAll() {
+  const sh = SpreadsheetApp.getActive().getSheetByName(SHEET_NAME);
+  if (!sh) return { ok: false, error: '「' + SHEET_NAME + '」 탭을 찾지 못했습니다' };
+  const tb = findTable(sh);
+  if (!tb) return { ok: false, error: '시트에서 결제 내역 표(머리행·합계 행)를 찾지 못했습니다' };
+  const first = tb.head + 1, n = tb.total - first;
+  if (n <= 0) return { ok: true, rows: [] };
+  const v = sh.getRange(first, 1, n, COLS).getValues();
+  const d = sh.getRange(first, 1, n, COLS).getDisplayValues();
+  const rows = [];
+  v.forEach(function (r, i) {
+    const krw = typeof r[6] === 'number' ? r[6] : Number(String(d[i][6]).replace(/[^0-9.-]/g, '')) || 0;
+    if (!String(d[i][2]).trim() && !krw) return;
+    rows.push({ row: first + i, day: d[i][0], cat: d[i][1], desc: d[i][2], payer: d[i][3], split: d[i][4],
+      method: d[i][5], krw: Math.round(krw), resv: d[i][7], jpyRef: d[i][8], note: d[i][9] });
+  });
+  return { ok: true, rows: rows };
 }
 
 function geminiKey() { return PropertiesService.getScriptProperties().getProperty('GEMINI_KEY') || GEMINI_KEY; }
