@@ -38,19 +38,21 @@ window.TRIP_DATA = {
       label: "DAY 1",
       date: "2026-11-14",
       weekday: "토",
-      title: "나리타 도착 → 하코네유모토 온천마을 → 고라",
-      stay: "Gora Onsen Kinkaku (예약 완료)",
+      title: "나리타 도착 → 신주쿠 점심 → 하코네유모토 → 고라",
+      stay: "Gora Onsen Kinkaku · 強羅1320-601 (예약 완료)",
       color: "#E0795A",
       schedule: [
         { time: "08:30", text: "인천국제공항 출발 [고정] (편명·터미널 확인 필요)", kind: "flight" },
         { time: "10:00–10:30", text: "나리타 도착 → 입국(Visit Japan Web QR) · 교통카드 준비(Welcome Suica 등, '결제·Wallet' 메뉴 참고)", kind: "flight", place: "d1-narita" },
-        { time: "11:00–11:20", text: "스카이라이너 나리타 → 닛포리 (최단 36분 · 1인 2,580엔, 할인 e-티켓 2,310엔 · 공항 출발 시각 확인 필요)", kind: "move" },
-        { time: "약 12:00–12:25", text: "JR 야마노테선 닛포리 → 신주쿠 (약 25분 추정 · 운임 확인 필요)", kind: "move" },
-        { time: "12:40", text: "로망스카 하코네 61호 신주쿠 12:40 → 하코네유모토 14:08 (토휴일 · 전석 지정, 지금 예약 가능)", kind: "move" },
-        { time: "14:10–16:30", text: "하코네유모토 관광: 치모토 먼저(17:00까지 안내) · 다케이치 완자 · 온천마을 · 족탕", kind: "visit", place: "d1-onsen-town" },
-        { time: "16:30–17:30", text: "등산전차 유모토 → 고라 (약 35분, 460엔) → 케이블카 → 가미고라 (주말 혼잡 대기 가능)", kind: "move", place: "d1-gora" },
-        { time: "17:30–18:00", text: "Gora Onsen Kinkaku 체크인 목표 [예약 완료]", kind: "stay", place: "d1-kinkaku" },
-        { time: "18:00–19:00", text: "저녁 식사 (식당 미정 · 고라 지역 영업시간 확인 또는 미리 구매)", kind: "meal" },
+        { time: "11:00–11:30", text: "게이세이 본선 특급 나리타공항 → 닛포리 (예약 없음 · 교통카드/현금 · 약 1시간 20~30분 · 1인 약 1,060엔, 2차 출처 · 지정석 없음)", kind: "move" },
+        { time: "12:30–13:00", text: "JR 야마노테선 닛포리 → 신주쿠 (약 25분 · 1인 200엔대 추정)", kind: "move" },
+        { time: "13:00–14:00", text: "신주쿠 도착 · 점심 (오다큐 신주쿠역 서쪽 출구 근처 권장 · 14:00에는 식당 출발, 늦으면 도시락)", kind: "meal", place: "d1-shinjuku" },
+        { time: "14:00–14:10", text: "오다큐 개찰구: 오와쿠다니 패스 '사용하기' → QR로 통과", kind: "move", place: "d1-shinjuku" },
+        { time: "14:20", text: "로망스카 하코네 39호 신주쿠 14:20 → 하코네유모토 15:48 [예약 완료] (특급권 2명 · 운임은 오와쿠다니 패스)", kind: "move" },
+        { time: "15:48–16:45", text: "하코네유모토 관광: 치모토 먼저(17:00까지) · 다케이치 완자 · 온천마을 · 족탕", kind: "visit", place: "d1-onsen-town" },
+        { time: "16:45–17:45", text: "등산전차 유모토 → 고라 (약 35분) → 케이블카 → 가미고라 (오와쿠다니 패스 · 주말 대기 가능)", kind: "move", place: "d1-gora" },
+        { time: "18:00 전후", text: "Gora Onsen Kinkaku 체크인 [예약 완료] — 숙소에 18시쯤 도착한다고 미리 알리기", kind: "stay", place: "d1-kinkaku" },
+        { time: "18:00–19:00", text: "저녁 식사 (식당 미정 · 고라 지역 영업시간 확인 또는 유모토에서 미리 구매)", kind: "meal" },
         { time: "19:00 이후", text: "프라이빗 온천 및 휴식 (예약 가능 시간 숙소 확인)", kind: "stay" }
       ],
       places: [
@@ -59,83 +61,92 @@ window.TRIP_DATA = {
           kind: "transit", status: "fixed", precision: "reference",
           lat: 35.7720, lng: 140.3929,
           precisionNote: "도착 터미널 미확정 — 공항 대표 지점",
-          time: "10:00–10:30 도착 예상 · 11:00–11:30 출발 계획",
+          time: "10:00–10:30 도착 예상 · 11:00–11:30 게이세이 본선 특급 출발",
           desc: "입국 후 하코네로 바로 이동합니다. 인천 08:30 출발 항공편은 고정 제약입니다.",
-          checks: ["정확한 편명과 도착 터미널", "나리타 → 하코네유모토 실제 경로·소요시간·운임"],
+          checks: ["정확한 편명과 도착 터미널", "게이세이 본선 특급 출발 시각·승강장"],
           osmQuery: "Narita International Airport"
         },
         {
-          id: "d1-yumoto-st", order: 2, name: "하코네유모토역", nameLocal: "箱根湯本駅",
+          id: "d1-shinjuku", order: 2, name: "신주쿠역 (점심·로망스카 승차)", nameLocal: "新宿駅",
+          kind: "transit", status: "transit", precision: "landmark",
+          lat: 35.6900, lng: 139.7004,
+          time: "13:00–13:30 도착 · 점심 · 14:20 로망스카 출발",
+          desc: "공항에서 게이세이 본선 특급 + JR로 도착해 점심을 먹고, 오다큐 신주쿠역에서 로망스카 하코네 39호를 탑니다. 점심 시간은 도착 시각에 따라 약 30분~1시간.",
+          checks: ["게이세이 본선 특급의 실제 출발 시각", "점심 식당 (오다큐 개찰구까지 도보 5분 안팎 권장)"],
+          osmQuery: "新宿駅 小田急"
+        },
+        {
+          id: "d1-yumoto-st", order: 3, name: "하코네유모토역", nameLocal: "箱根湯本駅",
           kind: "transit", status: "transit", precision: "landmark",
           lat: 35.2326, lng: 139.1055,
-          time: "14:08 도착 (로망스카 하코네 61호, 토휴일)",
+          time: "15:48 도착 (로망스카 하코네 39호) · 16:45 전후 고라행 출발",
           desc: "하코네 관광의 출발점. 이후 등산전차로 고라까지 이동합니다.",
           checks: ["짐 보관·운송 서비스 실제 이용 가능 여부"],
           osmQuery: "箱根湯本駅"
         },
         {
-          id: "d1-chimoto", order: 3, name: "치모토 (Chimoto)", nameLocal: "ちもと",
+          id: "d1-chimoto", order: 4, name: "치모토 (Chimoto)", nameLocal: "ちもと",
           kind: "visit", status: "course", precision: "reference", yoonha: "check",
           lat: 35.2326, lng: 139.1055,
           precisionNote: "방문 지점 미확정 — 하코네유모토역을 기준점으로 표시",
-          time: "14:10–16:30 중 · 가장 먼저 방문",
+          time: "15:48 이후 가장 먼저 방문 (17:00 종료 안내)",
           desc: "하코네유모토의 화과자점. 에키마에도리점은 공식 안내상 9:00~17:00로 검색되었으나 방문일 휴무 여부는 미확인입니다.",
           checks: ["어느 지점을 방문할지", "방문일 영업시간·임시 휴무", "윤일담 실제 촬영지인지 여부"],
           links: [{ label: "치모토 안내 (명세에 제공된 링크)", url: "https://www.yumochi.com/page7" }],
           osmQuery: "ちもと 箱根湯本"
         },
         {
-          id: "d1-takeichi", order: 4, name: "다케이치 완자", nameLocal: "竹いち",
+          id: "d1-takeichi", order: 5, name: "다케이치 완자", nameLocal: "竹いち",
           kind: "visit", status: "course", precision: "reference", yoonha: "check",
           lat: 35.2326, lng: 139.1055,
           precisionNote: "정확한 매장 위치 미확인 — 하코네유모토역을 기준점으로 표시",
-          time: "14:10–16:30 중",
+          time: "15:48–16:45 중",
           desc: "하코네유모토 상점가에서 먹을 완자(어묵 꼬치) 간식.",
           checks: ["정확한 매장 위치", "영업시간", "윤일담 실제 촬영지인지 여부"],
           osmQuery: "竹いち 箱根湯本"
         },
         {
-          id: "d1-onsen-town", order: 5, name: "하코네유모토 온천마을", nameLocal: "箱根湯本温泉街",
+          id: "d1-onsen-town", order: 6, name: "하코네유모토 온천마을", nameLocal: "箱根湯本温泉街",
           kind: "visit", status: "course", precision: "area", yoonha: "check",
           lat: 35.2319, lng: 139.1036,
           precisionNote: "역 앞 상점가 일대의 대표 지점",
-          time: "14:10–16:30",
+          time: "15:48–16:45",
           desc: "역 앞 상점가와 하야카와 강변 온천마을 산책. DAY 1의 윤일담 관련 코스입니다.",
           checks: ["윤일담 실제 촬영지와 일반 방문 장소의 구분"],
           osmQuery: "箱根湯本 温泉街"
         },
         {
-          id: "d1-footbath", order: 6, name: "온천마을 족탕", nameLocal: "足湯",
+          id: "d1-footbath", order: 7, name: "온천마을 족탕", nameLocal: "足湯",
           kind: "visit", status: "course", precision: "reference",
           lat: 35.2319, lng: 139.1036,
           precisionNote: "족탕 위치 미확인 — 온천마을 대표 지점을 기준점으로 표시",
-          time: "14:10–16:30 중",
+          time: "15:48–16:45 중",
           desc: "온천마을 산책 중 들를 족탕.",
           checks: ["족탕의 위치", "방문일 운영 여부"],
           osmQuery: "箱根湯本 足湯"
         },
         {
-          id: "d1-gora", order: 7, name: "고라역 (환승)", nameLocal: "強羅駅",
+          id: "d1-gora", order: 8, name: "고라역 (환승)", nameLocal: "強羅駅",
           kind: "transit", status: "transit", precision: "landmark",
           lat: 35.2503, lng: 139.0471,
-          time: "16:30–17:30 이동 중",
+          time: "16:45–17:45 이동 중",
           desc: "관광 목적지가 아닌 환승 지점. 등산전차 → 케이블카로 갈아탑니다.",
           checks: ["하코네유모토 → 고라 등산전차 운행시간", "고라 → 가미고라 케이블카 운행시간", "11월 주말 혼잡·대기"],
           osmQuery: "強羅駅"
         },
         {
-          id: "d1-kinkaku", order: 8, name: "Gora Onsen Kinkaku", nameLocal: "強羅温泉 金閣荘",
-          kind: "stay", status: "booked", precision: "reference",
+          id: "d1-kinkaku", order: 9, name: "Gora Onsen Kinkaku", nameLocal: "強羅温泉 金閣荘",
+          kind: "stay", status: "booked", precision: "area",
           lat: 35.2456, lng: 139.0383,
-          precisionNote: "숙소 좌표 미확인 — 가미고라역(上強羅) 부근을 기준점으로 표시",
-          time: "17:30–18:00 체크인 목표 · 11/15 체크아웃",
-          desc: "1박 · 2인 · 예약 완료. 예약제 프라이빗 온천(무료). 공개 숙박 안내에는 주소가 고라 1320-601, 가장 가까운 역이 가미고라역으로 나와 있으나 예약 확인서와 대조하지 않았습니다.",
-          checks: ["예약 확인서의 주소·지도 좌표", "프라이빗 온천 예약 가능 시간·이용 조건", "고라 지역 저녁 식사 또는 사전 음식 구매"],
+          precisionNote: "주소 확인(強羅1320-601) · 지도 좌표는 가미고라역 부근 근사값",
+          time: "18:00 전후 체크인 (숙소에 미리 알림) · 11/15 체크아웃",
+          desc: "1박 · 2인 · 예약 완료(160,821원). 주소: 〒250-0408 神奈川県足柄下郡箱根町強羅1320-601 (예약 정보 기준). 가장 가까운 역은 가미고라역. 예약제 프라이빗 온천(무료).",
+          checks: ["숙소에 18시쯤 도착 예정 알리기", "프라이빗 온천 예약 가능 시간·이용 조건", "하코네 캐리 서비스 이용 가능 여부 (11/15 체크아웃 짐)", "고라 지역 저녁 식사 또는 사전 음식 구매"],
           links: [
             { label: "Agoda 예약 페이지", url: "https://www.agoda.com/ko-kr/gora-onsen-kinkaku-private-onsen-free-by-reservation/hotel/all/hakone-jp.html?checkin=2026-11-14&checkout=2026-11-15&los=1&rooms=1&adults=2&children=0" },
             { label: "LIVE JAPAN 숙소 정보 (주소·최근접역)", url: "https://livejapan.com/en/in-tokyo/in-pref-kanagawa/in-hakone_odawara/spot-lj0057904" }
           ],
-          osmQuery: "上強羅駅"
+          osmQuery: "箱根町強羅1320-601"
         }
       ]
     },
@@ -146,19 +157,19 @@ window.TRIP_DATA = {
       date: "2026-11-15",
       weekday: "일",
       title: "오와쿠다니 → 신주쿠 → 다이칸야마 → 시부야 → 돈키호테",
-      stay: "신주쿠 지역 예약 숙소 (예약 완료 · 숙소명 대조 필요)",
+      stay: "Premier Hotel -CABIN- Shinjuku · 歌舞伎町2-40-3 (예약 완료)",
       color: "#1E88C8",
       schedule: [
         { time: "07:30–08:30", text: "기상 · 체크아웃 준비 · 짐은 하코네 캐리 서비스로 유모토역 보내기 (프런트 10:00 마감, 1개 1,500엔 · 제휴 숙소인지 확인 필요)", kind: "stay", place: "d2-kinkaku" },
-        { time: "08:30–09:00", text: "케이블카 가미고라 → 소운잔 (운임 확인 필요)", kind: "move", place: "d2-sounzan" },
-        { time: "09:00–09:15", text: "로프웨이 소운잔 → 오와쿠다니 (운행 9:00부터 · 약 10분 · 왕복 3,000엔/인)", kind: "move" },
+        { time: "08:30–09:00", text: "케이블카 가미고라 → 소운잔 (오와쿠다니 패스)", kind: "move", place: "d2-sounzan" },
+        { time: "09:00–09:15", text: "로프웨이 소운잔 → 오와쿠다니 (운행 9:00부터 · 약 10분 · 오와쿠다니 패스) · 아침에 운행 정보 확인", kind: "move" },
         { time: "09:15–10:30", text: "오와쿠다니 관광 · 화산 전망 · 쿠로타마고(4개 500엔, 2차 출처)", kind: "visit", place: "d2-owakudani" },
-        { time: "10:30–12:00", text: "하산: 로프웨이 → 소운잔 → 케이블카(430엔) → 고라 → 등산전차(460엔) → 유모토 (탑승 약 1시간 + 대기)", kind: "move" },
+        { time: "10:30–12:00", text: "하산: 로프웨이 → 소운잔 → 케이블카 → 고라 → 등산전차 → 유모토 (패스 · 탑승 약 1시간 + 대기 · 11시 넘으면 서둘러 하산)", kind: "move" },
         { time: "12:00–13:00", text: "점심 (하코네유모토 · 식당 미정)", kind: "meal" },
-        { time: "13:30–14:00", text: "하코네유모토역에서 짐 수령 (캐리 서비스 수령 13:30–18:30)", kind: "move", place: "d2-yumoto" },
-        { time: "14:00 전후", text: "로망스카 하코네유모토 → 신주쿠 (약 80분 · 운임 1,270 + 특급 1,200엔/인 · [미예약] 정확한 시각 확인 필요)", kind: "move" },
-        { time: "15:30–16:00", text: "신주쿠 도착", kind: "move" },
-        { time: "16:00–16:30", text: "예약 숙소 체크인 [예약 완료]", kind: "stay", place: "d2-hotel" },
+        { time: "13:30–14:00", text: "하코네유모토역에서 짐 수령 (캐리 서비스 이용 시 13:30–18:30) · 14:00까지 역 도착", kind: "move", place: "d2-yumoto" },
+        { time: "14:16", text: "로망스카 하코네유모토 14:16 → 신주쿠 [예약 완료] (특급권 2명 · 운임은 오와쿠다니 패스 · 도착 시각은 특급권 화면 확인)", kind: "move" },
+        { time: "15:35–15:45", text: "신주쿠 도착 (약 80~90분 추정)", kind: "move" },
+        { time: "16:00–16:30", text: "숙소 체크인 [예약 완료] — 가부키초 2-40-3, JR 신주쿠역 동쪽 출구 도보 약 8~10분", kind: "stay", place: "d2-hotel" },
         { time: "16:30–17:00", text: "JR 야마노테 신주쿠 → 시부야 → 도큐 도요코선 각역정차 → 다이칸야마 (약 20분, 339엔/인)", kind: "move" },
         { time: "17:00–18:30", text: "다이칸야마 거리 · T-SITE 츠타야", kind: "visit", place: "d2-daikanyama" },
         { time: "18:30–19:00", text: "다이칸야마 → 시부야 (도보 15–20분 또는 도요코선 140엔)", kind: "move" },
@@ -171,13 +182,13 @@ window.TRIP_DATA = {
       places: [
         {
           id: "d2-kinkaku", order: 1, name: "Gora Onsen Kinkaku (체크아웃)", nameLocal: "強羅温泉 金閣荘",
-          kind: "stay", status: "booked", precision: "reference",
+          kind: "stay", status: "booked", precision: "area",
           lat: 35.2456, lng: 139.0383,
-          precisionNote: "숙소 좌표 미확인 — 가미고라역 부근을 기준점으로 표시",
+          precisionNote: "주소 확인(強羅1320-601) · 지도 좌표는 가미고라역 부근 근사값",
           time: "07:30–08:30 체크아웃 준비",
           desc: "체크아웃 후 가미고라역에서 케이블카를 탑니다.",
           checks: ["체크아웃 후 짐 처리 방법 (아래 '동선 점검' 참고)"],
-          osmQuery: "上強羅駅"
+          osmQuery: "箱根町強羅1320-601"
         },
         {
           id: "d2-sounzan", order: 2, name: "소운잔역 (환승)", nameLocal: "早雲山駅",
@@ -211,21 +222,21 @@ window.TRIP_DATA = {
           id: "d2-yumoto", order: 5, name: "하코네유모토역 (짐 회수·출발)", nameLocal: "箱根湯本駅",
           kind: "transit", status: "transit", precision: "landmark",
           lat: 35.2326, lng: 139.1055,
-          time: "13:30 짐 수령 · 14:00 전후 로망스카 출발",
-          desc: "신주쿠행 열차 출발지. 열차는 아직 예약하지 않았습니다.",
-          checks: ["짐을 어디에 맡겼다가 회수하는지", "로망스카 시간표와 좌석 예약 (전석 지정석)"],
+          time: "13:30 짐 수령 · 14:16 로망스카 출발 [예약 완료]",
+          desc: "신주쿠행 로망스카 출발지. 14:16 열차 특급권 2명 예약 완료, 운임은 오와쿠다니 패스로 개찰.",
+          checks: ["짐을 어디에 맡겼다가 회수하는지 (캐리 서비스 제휴 여부)"],
           osmQuery: "箱根湯本駅"
         },
         {
-          id: "d2-hotel", order: 6, name: "신주쿠 예약 숙소", nameLocal: "新宿 (숙소명 대조 필요)",
-          kind: "stay", status: "booked", precision: "reference",
-          lat: 35.6900, lng: 139.7004,
-          precisionNote: "숙소 위치 미확정 — 신주쿠역을 임시 기준점으로 표시",
-          time: "16:00–16:30 체크인 · 21:00–21:30 복귀 · 11/16 체크아웃",
-          desc: "1박 · 2인 · 예약 완료 (Agoda Property ID 43346). 검색상 이 ID가 Premier Hotel-CABIN-Shinjuku(가부키초 2-40-3)와 연결된다는 결과가 있었으나, 예약 확인서와 대조하지 않아 숙소명·위치를 확정하지 않았습니다.",
-          checks: ["예약 확인서의 숙소명·주소·최근접역", "체크인 가능 시각"],
+          id: "d2-hotel", order: 6, name: "신주쿠 숙소 (Premier Hotel -CABIN- Shinjuku)", nameLocal: "東京都新宿区歌舞伎町2-40-3",
+          kind: "stay", status: "booked", precision: "area",
+          lat: 35.6968, lng: 139.7006,
+          precisionNote: "주소 확인(歌舞伎町2-40-3) · 지도 좌표는 주소 기준 근사값 (세이부신주쿠역 북쪽 도보 약 2분)",
+          time: "16:00–16:30 체크인 · 22:30–23:00 복귀 · 11/16 08:00–08:30 체크아웃",
+          desc: "1박 · 2인 · 예약 완료(141,935원, Agoda 43346). 주소: 〒160-0021 東京都新宿区歌舞伎町2-40-3 (예약 정보 기준) — Premier Hotel -CABIN- Shinjuku 공식 주소와 일치합니다. 세이부신주쿠역 도보 약 2분, JR 신주쿠역 동쪽 출구 도보 약 8~10분.",
+          checks: ["체크인 시각 (공식 안내 15:00)", "도시세(숙박세) 현장 결제 여부"],
           links: [{ label: "Agoda 예약 페이지 (Property ID 43346)", url: "https://www.agoda.com/ko-kr/accom/property?propertyId=43346&countryId=3&checkIn=2026-11-15&adults=2&rooms=1&los=1" }],
-          osmQuery: "新宿駅"
+          osmQuery: "新宿区歌舞伎町2-40-3"
         },
         {
           id: "d2-matsukiyo", order: 7, name: "마츠모토키요시 (선택)", nameLocal: "マツモトキヨシ",
@@ -344,22 +355,22 @@ window.TRIP_DATA = {
         { time: "10:45–11:30", text: "센소지", kind: "visit", place: "d3-sensoji" },
         { time: "11:30–12:00", text: "아사쿠사 골목 산책", kind: "visit", place: "d3-backstreets" },
         { time: "12:00–13:00", text: "카미나리몬 산사다 덴푸라 점심 (11:30 개점, 2차 출처)", kind: "meal", place: "d3-sansada" },
-        { time: "13:00–13:40", text: "쇼핑 및 자유시간", kind: "visit", place: "d3-backstreets" },
-        { time: "13:40–14:15", text: "짐 회수 · 이동 준비", kind: "move" },
-        { time: "14:21", text: "도에이 아사쿠사선 직통 「エアポート快特」 아사쿠사 14:21 → 나리타 (약 70분 추정 · 1,276엔/인 · 여유 원하면 13:43)", kind: "move" },
-        { time: "15:30–16:00", text: "나리타공항 도착 목표 [고정] → 체크인 전에 면세 환급 확인(물건·영수증·여권) → 체크인 → 보안검색", kind: "flight", place: "d3-narita" },
+        { time: "13:00–13:15", text: "짧은 쇼핑 (산사다 대기가 길면 생략)", kind: "visit", place: "d3-backstreets" },
+        { time: "13:15–13:35", text: "짐 회수 · 아사쿠사역 승강장으로", kind: "move" },
+        { time: "13:43", text: "도에이 아사쿠사선 직통 「エアポート快特」 아사쿠사 13:43 → 나리타 (약 70분 추정 · 1,276엔/인 · 교통카드) · 놓치면 14:21", kind: "move" },
+        { time: "15:00 전후", text: "나리타공항 도착 [고정 목표 15:30–16:00보다 여유] → 체크인 전에 면세 환급 확인(물건·영수증·여권) → 체크인 → 보안검색", kind: "flight", place: "d3-narita" },
         { time: "18:50", text: "나리타공항 출발 [고정] (편명·터미널 확인 필요)", kind: "flight", place: "d3-narita" }
       ],
       places: [
         {
-          id: "d3-hotel", order: 1, name: "신주쿠 예약 숙소 (체크아웃)", nameLocal: "新宿 (숙소명 대조 필요)",
-          kind: "stay", status: "booked", precision: "reference",
-          lat: 35.6900, lng: 139.7004,
-          precisionNote: "숙소 위치 미확정 — 신주쿠역을 임시 기준점으로 표시",
+          id: "d3-hotel", order: 1, name: "신주쿠 숙소 (체크아웃)", nameLocal: "東京都新宿区歌舞伎町2-40-3",
+          kind: "stay", status: "booked", precision: "area",
+          lat: 35.6968, lng: 139.7006,
+          precisionNote: "주소 확인(歌舞伎町2-40-3) · 지도 좌표는 주소 기준 근사값 (세이부신주쿠역 북쪽 도보 약 2분)",
           time: "08:00–08:30 체크아웃",
-          desc: "체크아웃 후 짐을 가지고 아사쿠사로 이동합니다.",
+          desc: "체크아웃 후 짐을 가지고 JR 신주쿠역(도보 약 8~10분) 또는 신주쿠역 지하철로 이동해 아사쿠사로 갑니다.",
           checks: ["여행 가방 보관 또는 운반 방법"],
-          osmQuery: "新宿駅"
+          osmQuery: "新宿区歌舞伎町2-40-3"
         },
         {
           id: "d3-kaminarimon", order: 2, name: "카미나리몬", nameLocal: "雷門",
@@ -393,7 +404,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "course", precision: "area",
           lat: 35.7122, lng: 139.7946,
           precisionNote: "덴보인도리 일대 대표 지점 (산책 경로 미정)",
-          time: "11:30–12:00 · 13:00–13:40",
+          time: "11:30–12:00 · 13:00–13:15",
           desc: "아사쿠사 골목 산책과 기념품 쇼핑.",
           checks: [],
           osmQuery: "伝法院通り"
@@ -412,9 +423,9 @@ window.TRIP_DATA = {
           kind: "transit", status: "fixed", precision: "reference",
           lat: 35.7720, lng: 140.3929,
           precisionNote: "출발 터미널 미확정 — 공항 대표 지점",
-          time: "15:30–16:00 도착 목표 · 18:50 출발",
+          time: "15:00 전후 도착 (13:43 직통) · 18:50 출발",
           desc: "귀국 항공편 18:50 출발은 고정 제약입니다.",
-          checks: ["정확한 편명과 출발 터미널", "아사쿠사 → 나리타 열차·소요시간"],
+          checks: ["정확한 편명과 출발 터미널 (하차역: 제1터미널 成田空港 / 제2·3터미널 空港第2ビル)"],
           osmQuery: "Narita International Airport"
         }
       ]
@@ -436,61 +447,51 @@ window.TRIP_DATA = {
   issues: [
     {
       day: "all", level: "high",
-      title: "교통비가 계획 18만 원을 넘을 가능성이 큼",
-      detail: "조사한 운임으로 계산하면 2인 교통비가 약 2만 8천 엔(약 24만 원, 100엔=855원 가정)입니다. 스카이라이너·로망스카 특급권 2회·하코네 프리패스가 대부분입니다. 계산 근거는 '예산' 메뉴의 예상 비용표를 보세요.",
-      options: [
-        "DAY 2 하코네유모토 → 신주쿠를 특급권 없는 오다큐 일반열차로 바꾸면 2인 약 2,300엔 절약 (소요시간 확인 필요)",
-        "숙박비 실제 결제액이 25만 원보다 적으면 남는 금액을 교통비로 이동",
-        "돈키호테·예비비 배정을 줄여 교통비를 먼저 확보 (지시서의 우선순위와 같음)"
-      ]
+      title: "오와쿠다니 패스 1장 추가 구매 필요",
+      detail: "현재 EMot에 '디지털 오와쿠다니 패스(신주쿠 출발, 11/14–15)' 어른 1장만 구매되어 있습니다. 두 사람 모두 필요하고, 디지털 패스는 각자 자기 폰에 1장씩 있어야 합니다.",
+      options: ["함께 가는 사람이 자기 폰으로 1장 구매", "또는 대표 계정에서 1장 더 사서 '티켓 상세(양도/환불 포함)'에서 상대방 EMot 계정으로 양도"]
     },
     {
       day: "all", level: "high",
-      title: "로망스카 2회 모두 미예약 — 지금 예약 가능",
-      detail: "로망스카는 전석 지정이며 승차 1개월 전 10:00(일본 시간)부터 판매합니다. 11/14·11/15 모두 판매 중입니다. DAY 1은 토휴일 하코네 61호(신주쿠 12:40 → 유모토 14:08)가 공식 시각표로 확인됩니다. DAY 2 일요일 14시대 상행 시각은 확인하지 못했습니다.",
-      options: ["EMot Online Tickets(e-Romancecar)에서 2인 좌석 예약 (온라인 특급요금 1,150엔)", "매진 시 오다큐 일반열차 또는 오다와라 경유"]
-    },
-    {
-      day: "day3", level: "high",
-      title: "2026-11-01부터 일본 면세가 '공항 환급' 방식으로 바뀜",
-      detail: "돈키호테 등에서는 세금 포함 가격으로 결제하고, 출국 날 나리타에서 체크인 전에 물건·영수증·여권을 가지고 확인을 받아야 환급됩니다. 한 영수증 안의 물건이 하나라도 없으면 그 영수증 전체가 환급되지 않습니다. 공식 소요시간은 없고 '여유를 충분히 두라'고만 안내합니다.",
-      options: ["면세 대상(같은 매장·같은 날 세전 5,000엔 이상) 물건은 위탁 가방 맨 위나 기내 가방에 따로 담기", "공항 도착 15:30 목표 유지, 가능하면 13:43 직통 열차로 앞당기기"]
-    },
-    {
-      day: "day2", level: "mid",
-      title: "체크아웃 후 짐 → 하코네 캐리 서비스로 해결 가능성",
-      detail: "공식 안내상 숙소 프런트에 당일 10:00까지 맡기면 하코네유모토역에서 13:30–18:30에 받을 수 있습니다(1개 1,500엔, 대형 2,500엔). 단, Gora Onsen Kinkaku가 제휴 숙소인지는 확인하지 못했습니다. DAY 1(유모토 14:08 도착)은 역 → 숙소 접수 마감 12:00을 넘으므로 짐을 들고 이동해야 합니다.",
-      options: ["숙소에 하코네 캐리 서비스 이용 가능 여부 문의", "불가하면 숙소에 짐을 맡기고 하산 길에 가미고라에서 회수 (동선 +30분 정도)"]
-    },
-    {
-      day: "all", level: "mid",
-      title: "11월 주말 하코네 혼잡 — 우선 개찰 예약은 이번 날짜에 없음",
-      detail: "2026년 우선 개찰(로프웨이 유료 패스트레인, 케이블카 우선승차)은 11/21·22에만 시행합니다. 11/14·15에는 줄을 서야 합니다. 등산전차는 주말 9–11시·15–17시가 붐빕니다.",
-      options: ["DAY 2는 08:30 가미고라 출발 유지 (로프웨이 9:00 첫 운행)", "DAY 1 16:30 등산전차가 붐비면 고라행이 늦어질 수 있으니 숙소에 도착 예정 시간 알리기"]
-    },
-    {
-      day: "day2", level: "mid",
-      title: "로프웨이 기상·화산가스 운휴 시 대체 수단 불확실",
-      detail: "공식 안내상 강풍·낙뢰·태풍이나 화산가스 측정값에 따라 운휴할 수 있습니다. 정기점검 때는 대행버스가 있지만, 갑작스러운 운휴 때 대행버스가 다니는지는 확인하지 못했습니다.",
-      options: ["당일 아침 하코네나비 운행 정보 확인", "운휴 시 현지 안내에 따라 버스 등 대체 수단 확인 — 오와쿠다니는 코스에서 삭제하지 않음", "프리패스 사용 시 한 번도 타지 못한 교통수단은 환불 대상(공식)"]
+      title: "예산: 숙박비 실제 302,756원 → 돈키호테·예비비 여유가 거의 없음",
+      detail: "숙박 302,756원(결제 완료) + 교통 약 21만 원(추정) + 식비 15만 원이면 70만 원 중 돈키호테·예비비로 약 3만 7천 원이 남습니다. '예산' 메뉴의 배정을 이 기준으로 바꿔 두었습니다.",
+      options: ["돈키호테·예비비를 줄여 70만 원 유지", "총예산을 75만~80만 원으로 올려 쇼핑·예비비 확보"]
     },
     {
       day: "day1", level: "mid",
-      title: "치모토 17:00 종료 — 도착 후 가장 먼저",
-      detail: "하코네유모토 도착이 14:08(로망스카 61호 기준)이라 관광 시간은 약 2시간 20분입니다. 입국이 늦어져 다음 로망스카로 밀리면 줄어듭니다.",
-      options: ["유모토 도착 후 치모토 → 다케이치 → 온천마을·족탕 순서", "16:30 출발은 유지 (체크인 17:30–18:00)"]
+      title: "첫날 신주쿠 점심 30분~1시간 · 유모토 관광 약 1시간",
+      detail: "게이세이 본선 특급(지정석 없음)으로 신주쿠 도착 예상 13:00–13:30, 로망스카 하코네 39호 14:20 출발, 유모토 15:48 도착입니다. 입국이 늦어지면 점심이 30분 정도로 줄어듭니다.",
+      options: ["점심은 오다큐 신주쿠역 근처, 14:00에는 식당 출발", "늦으면 도시락을 사서 로망스카 안에서", "유모토에서는 치모토(17:00 종료) 먼저", "숙소에 18시쯤 도착한다고 미리 알리기", "로망스카 변경은 출발 전에만 가능"]
+    },
+    {
+      day: "day2", level: "mid",
+      title: "체크아웃 후 짐 → 하코네 캐리 서비스 가능 여부 확인",
+      detail: "공식 안내상 숙소 프런트에 10:00까지 맡기면 하코네유모토역에서 13:30–18:30에 받을 수 있습니다(1개 1,500엔). Gora Onsen Kinkaku가 제휴 숙소인지는 확인하지 못했습니다. 14:16 로망스카 전에 13:30 수령이면 일정과 맞습니다.",
+      options: ["숙소에 캐리 서비스 이용 가능 여부 문의", "불가하면 숙소에 맡기고 하산 길에 가미고라에서 회수(약 +30분) 또는 짐을 들고 이동"]
+    },
+    {
+      day: "day2", level: "mid",
+      title: "14:16 로망스카에 맞춘 오전 일정",
+      detail: "14:00까지 하코네유모토역에 있어야 합니다. 오와쿠다니 09:15–10:30, 하산 약 1시간 + 주말 대기면 유모토 11:30–12:30 도착이라 점심 후에도 여유가 있습니다. 11/14–15에는 우선 개찰 예약 제도가 없어 줄을 서야 합니다.",
+      options: ["오와쿠다니에서 11시가 넘으면 바로 하산", "당일 아침 로프웨이 운행 정보 확인 (기상·화산가스 운휴 가능)", "운휴 시에도 14:16 로망스카를 우선 — 오와쿠다니는 코스에서 삭제하지 않고 시간 조정"]
+    },
+    {
+      day: "day3", level: "mid",
+      title: "2026-11-01부터 면세는 '공항 환급' 방식",
+      detail: "돈키호테 등에서는 세금 포함 가격으로 결제하고, 나리타에서 체크인 전에 물건·영수증·여권을 가지고 확인을 받아야 환급됩니다. 13:43 직통 열차로 15:00 전후 공항 도착이면 시간 여유가 있습니다.",
+      options: ["면세품(같은 매장·같은 날 세전 5,000엔 이상)은 꺼내기 쉬운 가방에 따로", "Visit Japan Web으로도 환급 수속 가능"]
+    },
+    {
+      day: "day3", level: "low",
+      title: "평일 출근 시간 신주쿠 → 아사쿠사 (짐 있음)",
+      detail: "08:30은 출근 혼잡 시간입니다. 마루노우치선 → 아카사카미쓰케(같은 승강장) → 긴자선 경로가 짐 들고 이동하기 편합니다.",
+      options: ["도에이 아사쿠사역 코인로커(개찰 밖, 대형 36개)에 짐 보관", "13:15쯤 짐 회수 → 13:43 직통"]
     },
     {
       day: "day2", level: "low",
       title: "다이칸야마 T-SITE 영업시간 출처 불일치",
-      detail: "T-SITE 공식 층별 안내는 09:00–22:00, 다른 점포 페이지는 1층 21:00·2층 20:00 종료로 나옵니다. 17:00–18:30 방문이면 어느 쪽이든 영업 중입니다.",
+      detail: "T-SITE 공식 층별 안내는 09:00–22:00, 다른 점포 페이지는 1층 21:00·2층 20:00 종료입니다. 17:00–18:30 방문이면 어느 쪽이든 영업 중입니다.",
       options: ["순서 변경 불필요"]
-    },
-    {
-      day: "day3", level: "mid",
-      title: "평일 출근 시간 신주쿠 → 아사쿠사 이동 (짐 있음)",
-      detail: "08:30은 출근 혼잡 시간입니다. 같은 승강장에서 갈아탈 수 있는 마루노우치선 → 아카사카미쓰케 → 긴자선 경로가 짐 들고 이동하기에 가장 편합니다.",
-      options: ["2인 + 큰 가방이면 택시(2차 출처 약 2,500–4,500엔)도 검토", "아사쿠사 도착 후 도에이 아사쿠사역 코인로커(개찰 밖, 대형 36개)"]
     }
   ],
 
@@ -498,8 +499,8 @@ window.TRIP_DATA = {
   verification: [
     {
       item: "Agoda Property ID 43346 실제 숙소",
-      result: "확인 못 함",
-      detail: "Premier Hotel-CABIN-Shinjuku일 가능성이 있습니다(가부키초 2-40-3, 세이부신주쿠역 북쪽 출구 도보 2분, JR 신주쿠역 동쪽 출구 도보 8분, 체크인 15:00·체크아웃 11:00). 예약 확인서와 대조해야 합니다.",
+      result: "부분 확인",
+      detail: "예약 정보의 주소가 東京都新宿区歌舞伎町2-40-3으로, Premier Hotel -CABIN- Shinjuku 공식 주소와 일치합니다(세이부신주쿠역 북쪽 출구 도보 2분, JR 신주쿠역 동쪽 출구 도보 8분, 체크인 15:00·체크아웃 11:00 — 공식·숙박 사이트 기준). 숙소명은 예약 확인서에서 한 번 더 확인하세요.",
       sources: [
         { title: "Premier Hotel -CABIN- Shinjuku 공식 공지 (주소)", url: "https://cabin.kenhotels.com/shinjuku/news/2026/05/07/5068/" },
         { title: "じゃらん 숙소 정보 (도보 시간)", url: "https://www.jalan.net/yad304851/" }
@@ -508,7 +509,7 @@ window.TRIP_DATA = {
     {
       item: "Gora Onsen Kinkaku 주소",
       result: "부분 확인",
-      detail: "숙박 안내 사이트 기준 고라 1320-601, 최근접역 가미고라역. 예약 확인서와 대조 전입니다. 하코네 캐리 서비스 제휴 여부도 미확인.",
+      detail: "예약 정보의 주소 神奈川県足柄下郡箱根町強羅1320-601과 숙박 안내 사이트 주소가 일치합니다. 최근접역 가미고라역. 지도 좌표는 근사값입니다. 하코네 캐리 서비스 제휴 여부는 미확인.",
       sources: [{ title: "LIVE JAPAN", url: "https://livejapan.com/en/in-tokyo/in-pref-kanagawa/in-hakone_odawara/spot-lj0057904" }]
     },
     {
@@ -536,7 +537,7 @@ window.TRIP_DATA = {
     {
       item: "2인 총예산 약 700,000원",
       result: "부분 확인",
-      detail: "교통비는 조사한 운임으로 추정했습니다(약 2만 8천 엔). 숙박비 실제 결제액과 식비는 없어 '예산' 메뉴에서 직접 입력해야 합니다. 환율은 11/6 하나은행 매매기준율 100엔=859.02원(2차 보도)이 가장 최근 확인값입니다.",
+      detail: "숙박비는 실제 결제액 302,756원(160,821원 + 141,935원)입니다. 교통비는 확정한 방식(게이세이 일반열차·오와쿠다니 패스·로망스카 특급권 2회) 기준 약 24,300엔(약 21만 원)으로 추정했습니다. 식비는 미정입니다. 환율은 11/6 하나은행 매매기준율 100엔=859.02원(2차 보도)이 가장 최근 확인값입니다.",
       sources: [{ title: "철강금속신문 (2026-11-06 환율 보도)", url: "https://www.snmnews.com/news/articleView.html?idxno=577060" }]
     }
   ]

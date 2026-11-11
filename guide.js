@@ -5,7 +5,7 @@
   "use strict";
 
   var VIEWS = ["transport", "budget", "wallet", "tickets", "food", "emergency"];
-  var LEDGER_KEY = "haha-trip-ledger-v2";
+  var LEDGER_KEY = "haha-trip-ledger-v3";
   var CHECK_KEY = "haha-trip-checklist-v1";
   var G = window.GUIDE_DATA || { views: {}, budget: null };
 
@@ -153,9 +153,9 @@
     var b = G.budget || {};
     return {
       totalKRW: b.totalKRW || 700000,
-      krwPer100Yen: null,
+      krwPer100Yen: typeof b.krwPer100Yen === "number" ? b.krwPer100Yen : null,
       categories: clone(b.categories || []),
-      expenses: []
+      expenses: clone(b.paid || [])
     };
   }
   function loadLedger() {
