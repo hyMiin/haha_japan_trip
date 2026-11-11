@@ -8,7 +8,8 @@
  *  4) 배포 → 새 배포 → 유형: 웹 앱
  *       실행 계정: 나 / 액세스 권한: 모든 사용자 → 배포 → 권한 승인
  *  5) 나온 웹 앱 URL(…/exec)을 뷰어 '예산' 메뉴 → 구글 시트 연동에 입력
- *  6) (캡처 입력) 프로젝트 설정(톱니바퀴) → 스크립트 속성 → 속성 추가
+ *  6) (캡처 입력) 함수 authorize 를 ▶ 실행해 권한 승인 → 배포 관리 → 새 버전으로 재배포
+ *     그리고 프로젝트 설정(톱니바퀴) → 스크립트 속성 → 속성 추가
  *       속성: GEMINI_KEY   값: Google AI Studio에서 받은 API 키
  *
  * 코드를 고친 뒤에는 배포 → 배포 관리 → 수정(연필) → 버전: 새 버전 → 배포 해야 반영됩니다.
@@ -185,4 +186,10 @@ function num(v) { const n = Number(v); return isFinite(n) && n > 0 ? Math.round(
 
 function out(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// 편집기에서 이 함수를 한 번 ▶ 실행하면 '외부 서비스에 연결' 권한 승인 창이 뜹니다 (캡처 입력용)
+function authorize() {
+  UrlFetchApp.fetch('https://generativelanguage.googleapis.com/', { muteHttpExceptions: true });
+  SpreadsheetApp.getActive();
 }
