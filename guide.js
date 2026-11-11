@@ -6,6 +6,7 @@
 
   var VIEWS = ["transport", "budget", "wallet", "tickets", "food", "emergency"];
   var LEDGER_KEY = "haha-trip-ledger-v7";
+  var SHEET_KEY = "haha-trip-sheet-v1";
   var CHECK_KEY = "haha-trip-checklist-v1";
   var G = window.GUIDE_DATA || { views: {}, budget: null };
 
@@ -180,12 +181,59 @@
           id: String(e.id || Math.random().toString(36).slice(2)), day: String(e.day || ""), cat: String(e.cat || ""),
           desc: String(e.desc || ""), amount: +e.amount, currency: e.currency === "KRW" ? "KRW" : "JPY",
           method: String(e.method || ""), split: e.split === "1인" ? "1인" : "2인",
-          payer: typeof e.payer === "string" ? e.payer : ""
+          payer: typeof e.payer === "string" ? e.payer : "",
+          sync: e.sync === "sent" || /^paid-/.test(String(e.id || "")) ? "sent" : (e.sync === "fail" ? "fail" : "")
         };
       });
     }
   }
   function saveLedger() { sset(LEDGER_KEY, JSON.stringify(ledger)); }
+
+  /* ---------- 구글 시트 연동 ---------- */
+  function sheetCfg() { try { var c = JSON.parse(sget(SHEET_KEY) || "null"); return c && c.url && c.token ? c : null; } catch (e) { return null; } }
+  function tripDay() {
+    var d = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); // 일본/한국 시간 날짜
+    return { "2026-11-14": "DAY 1", "2026-11-15": "DAY 2", "2026-11-16": "DAY 3" }[d] || (d < "2026-11-14" ? "출국 전" : "DAY 3");
+  }
+  function guessCat(t) {
+    t = String(t || "");
+    var rules = [["stay", /숙소|숙박|호텔|료칸|온천세|입탕세/], ["transport", /교통|전철|지하철|열차|기차|버스|택시|로망스카|스이카|suica|pasmo|패스|케이블|로프웨이|게이세이|jr/i],
+      ["donki", /돈키|돈키호테|면세|쇼핑/], ["food", /식|밥|점심|저녁|아침|간식|카페|커피|맥주|술|라멘|스시|초밥|편의점|도시락|빵|디저트/]];
+    for (var i = 0; i < rules.length; i++) if (rules[i][1].test(t) && ledger.categories.some(function (c) { return c.id === rules[i][0]; })) return rules[i][0];
+    return ledger.categories.some(function (c) { return c.id === "etc"; }) ? "etc" : (ledger.categories[0] || {}).id || "";
+  }
+  function sheetDay(d) { var m = /^DAY (\d)$/.exec(d || ""); return m ? m[1] + "일차" : (d || ""); }
+  function setSheetStatus(msg, bad) { var el = $("lg-sheet-status"); if (el) { el.textContent = msg; el.className = "g-note" + (bad ? " neg" : ""); } }
+  function post(cfg, body) {
+    body.token = cfg.token;
+    return fetch(cfg.url, { method: "POST", body: JSON.stringify(body) }) // text/plain → 사전요청 없음
+      .then(function (r) { return r.json(); });
+  }
+  function sendEntry(e) {
+    var cfg = sheetCfg();
+    if (!cfg) return Promise.resolve(false);
+    var k = toKRW(e);
+    var catLabel = (ledger.categories.filter(function (c) { return c.id === e.cat; })[0] || {}).label || e.cat;
+    e.sync = "sending"; updateBudget();
+    return post(cfg, { action: "add", entry: {
+      id: e.id, day: sheetDay(e.day), cat: catLabel, desc: e.desc, payer: e.payer, split: e.split,
+      method: e.method || "", krw: k == null ? 0 : Math.round(k), jpy: e.currency === "JPY" ? e.amount : "", memo: "뷰어 입력"
+    } }).then(function (res) {
+      e.sync = res && res.ok ? "sent" : "fail";
+      if (!(res && res.ok)) setSheetStatus("시트 추가 실패: " + ((res && res.error) || "응답 없음"), true);
+      else setSheetStatus("시트에 추가했습니다" + (res.duplicate ? " (이미 있던 항목)" : "") + ".");
+      return e.sync === "sent";
+    }).catch(function () {
+      e.sync = "fail"; setSheetStatus("시트에 보내지 못했습니다(인터넷 연결 또는 웹 앱 주소 확인). '안 보낸 지출 보내기'로 다시 보낼 수 있어요.", true);
+      return false;
+    }).then(function (ok) { saveLedger(); updateBudget(); return ok; });
+  }
+  function sendPending() {
+    var list = ledger.expenses.filter(function (e) { return e.sync !== "sent"; });
+    if (!sheetCfg()) { setSheetStatus("먼저 웹 앱 주소와 비밀 코드를 저장하세요.", true); return; }
+    if (!list.length) { setSheetStatus("보낼 지출이 없습니다."); return; }
+    list.reduce(function (p, e) { return p.then(function () { return sendEntry(e); }); }, Promise.resolve());
+  }
   function toKRW(e) {
     if (e.currency === "KRW") return e.amount;
     return typeof ledger.krwPer100Yen === "number" ? e.amount * ledger.krwPer100Yen / 100 : null;
@@ -212,17 +260,24 @@
     h += '<section class="g-sec"><h3>항목별 계획 · 실제 · 잔여</h3><div class="g-table-wrap"><table class="g-table keep lg-cats"><thead><tr><th>항목</th><th>계획(원)</th><th>실제 지출(원 환산)</th><th>남은 예산</th></tr></thead><tbody id="lg-cat-body"></tbody>' +
       '<tfoot><tr><th>합계</th><td id="lg-plan-sum"></td><td id="lg-act-sum"></td><td id="lg-rem-sum"></td></tr></tfoot></table></div>' +
       '<p class="g-note" id="lg-plan-check"></p>' + (b.planNote ? '<p class="g-note">' + fmt(b.planNote) + "</p>" : "") + "</section>";
+    var cfg = sheetCfg();
     h += '<section class="g-sec"><h3>지출 입력</h3><form id="lg-form" class="lg-form" autocomplete="off">' +
-      '<label>날짜<select name="day">' + days.map(function (d) { return "<option>" + d + "</option>"; }).join("") + "</select></label>" +
-      '<label>항목<select name="cat">' + ledger.categories.map(function (c) { return '<option value="' + esc(c.id) + '">' + esc(c.label) + "</option>"; }).join("") + "</select></label>" +
-      '<label class="wide">내용<input name="desc" placeholder="예: 로망스카 특급권 2인"></label>' +
-      '<label>금액<input name="amount" type="number" inputmode="decimal" min="0" step="1" required></label>' +
-      '<label>통화<select name="currency"><option value="JPY">엔</option><option value="KRW">원</option></select></label>' +
-      '<label>결제수단<select name="method">' + methods.map(function (m) { return "<option>" + esc(m) + "</option>"; }).join("") + "</select></label>" +
-      '<label>구분<select name="split"><option>2인</option><option>1인</option></select></label>' +
-      '<label>결제자' + payerSelect('name="payer"', "") + "</label>" +
-      '<button type="submit" class="btn primary">추가</button></form></section>';
-    h += '<section class="g-sec"><h3>지출 내역</h3><div class="g-table-wrap"><table class="g-table"><thead><tr><th>날짜</th><th>항목</th><th>내용</th><th>엔화</th><th>원화 환산</th><th>결제수단</th><th>1인/2인</th><th>결제자</th><th></th></tr></thead><tbody id="lg-exp-body"></tbody></table></div></section>';
+      '<label>결제자' + payerSelect('name="payer" required', people()[0]) + "</label>" +
+      '<label class="wide">항목<input name="desc" list="lg-items" placeholder="예: 저녁 · 스이카 충전 · 돈키호테" required></label>' +
+      '<datalist id="lg-items"><option>점심</option><option>저녁</option><option>간식·카페</option><option>편의점</option><option>교통</option><option>스이카 충전</option><option>돈키호테</option><option>기념품</option></datalist>' +
+      '<label>금액(원)<input name="amount" type="number" inputmode="numeric" min="0" step="1" required></label>' +
+      '<button type="submit" class="btn primary">추가</button></form>' +
+      '<p class="g-note">날짜는 오늘 기준(11/14 → DAY 1)으로, 예산 항목은 입력한 단어로 자동 분류하고, 둘이 나눠 내는 2인 항목으로 저장합니다. 1인 항목은 아래 내역에서 바꿀 수 있어요.' +
+      (cfg ? " 추가하면 구글 시트에도 바로 들어갑니다." : " 구글 시트 연동은 아래에서 설정하세요.") + "</p></section>";
+    h += '<section class="g-sec"><h3>지출 내역</h3><div class="g-table-wrap"><table class="g-table"><thead><tr><th>날짜</th><th>항목</th><th>내용</th><th>엔화</th><th>원화 환산</th><th>결제수단</th><th>1인/2인</th><th>결제자</th><th>시트</th><th></th></tr></thead><tbody id="lg-exp-body"></tbody></table></div></section>';
+    h += '<section class="g-sec"><h3>구글 시트 연동</h3><form id="lg-sheet" class="lg-form" autocomplete="off">' +
+      '<label class="wide">웹 앱 주소<input name="url" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(cfg ? cfg.url : "") + '"></label>' +
+      '<label>비밀 코드<input name="token" type="password" value="' + esc(cfg ? cfg.token : "") + '"></label>' +
+      '<button type="submit" class="btn primary">저장 · 연결 확인</button>' +
+      '<button type="button" class="btn" id="lg-sync-all">안 보낸 지출 보내기</button>' +
+      '<button type="button" class="btn" id="lg-sheet-off">연동 끄기</button></form>' +
+      '<p id="lg-sheet-status" class="g-note">' + (cfg ? "연동됨 · 이 기기에만 저장되어 있습니다." : "연동 안 됨") + '</p>' +
+      '<p class="g-note">주소와 비밀 코드는 이 폰의 브라우저에만 저장되고 사이트에는 올라가지 않습니다. 뷰어에서 삭제하거나 결제자를 바꿔도 시트에는 반영되지 않으니 시트에서 직접 고쳐 주세요.</p></section>';
     h += '<section class="g-sec"><h3>사람별 결제 · 정산</h3><div id="lg-people"></div>' +
       '<p class="g-note">2인 항목은 반씩 나눠 부담하고, 1인 항목은 결제한 사람 몫으로 계산합니다. 결제자가 \'미지정\'인 항목은 정산에서 빠집니다.</p></section>';
     if (b.estimates) h += '<section class="g-sec"><h3>' + fmt(b.estimates.title) + "</h3>" + b.estimates.blocks.map(block).join("") + "</section>";
@@ -259,10 +314,11 @@
       var k = toKRW(e);
       return '<tr><td data-label="날짜">' + esc(e.day) + '</td><td data-label="항목">' + esc(catLabel[e.cat] || e.cat) + '</td><td data-label="내용">' + esc(e.desc) +
         '</td><td data-label="엔화">' + (e.currency === "JPY" ? yen(e.amount) : "–") + '</td><td data-label="원화 환산">' + won(k) +
-        '</td><td data-label="결제수단">' + esc(e.method) + '</td><td data-label="1인/2인">' + esc(e.split) +
+        '</td><td data-label="결제수단">' + esc(e.method || "–") + '</td><td data-label="1인/2인"><select data-split="' + esc(e.id) + '" aria-label="1인/2인"><option' + (e.split === "2인" ? " selected" : "") + '>2인</option><option' + (e.split === "1인" ? " selected" : "") + '>1인</option></select>' +
         '</td><td data-label="결제자">' + payerSelect('data-payer="' + esc(e.id) + '"', e.payer) +
+        '</td><td data-label="시트">' + (e.sync === "sent" ? "✓" : e.sync === "sending" ? "보내는 중" : e.sync === "fail" ? '<button type="button" class="btn sm" data-resend="' + esc(e.id) + '">다시 보내기</button>' : "–") +
         '</td><td><button type="button" class="btn sm" data-del="' + esc(e.id) + '" aria-label="삭제">삭제</button></td></tr>';
-    }).join("") : '<tr><td colspan="9" class="g-note">아직 입력한 지출이 없습니다.</td></tr>';
+    }).join("") : '<tr><td colspan="10" class="g-note">아직 입력한 지출이 없습니다.</td></tr>';
     renderPeople();
   }
 
@@ -308,6 +364,10 @@
         if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
+      var rs = e.target.closest("[data-resend]");
+      if (rs) { var rid = rs.getAttribute("data-resend"); ledger.expenses.forEach(function (x) { if (x.id === rid) sendEntry(x); }); return; }
+      if (e.target.id === "lg-sync-all") { sendPending(); return; }
+      if (e.target.id === "lg-sheet-off") { try { localStorage.removeItem(SHEET_KEY); } catch (er) { /* ignore */ } renderView("budget"); return; }
       var d = e.target.closest("[data-del]");
       if (d) {
         var id = d.getAttribute("data-del");
@@ -316,6 +376,8 @@
       }
     });
     gv.addEventListener("change", function (e) {
+      var sid = e.target.getAttribute("data-split");
+      if (sid) { ledger.expenses.forEach(function (x) { if (x.id === sid) x.split = e.target.value; }); saveLedger(); renderPeople(); return; }
       var pid = e.target.getAttribute("data-payer");
       if (pid) {
         ledger.expenses.forEach(function (x) { if (x.id === pid) x.payer = e.target.value; });
@@ -346,19 +408,32 @@
       }
     });
     gv.addEventListener("submit", function (e) {
-      if (e.target.id !== "lg-form") return;
-      e.preventDefault();
       var f = e.target;
+      if (f.id === "lg-sheet") {
+        e.preventDefault();
+        var cfg = { url: f.url.value.trim(), token: f.token.value };
+        if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(cfg.url) || !cfg.token) { setSheetStatus("script.google.com 으로 시작하는 웹 앱 주소와 비밀 코드를 모두 넣어 주세요.", true); return; }
+        setSheetStatus("연결 확인 중…");
+        post(cfg, { action: "ping" }).then(function (res) {
+          if (res && res.ok) { sset(SHEET_KEY, JSON.stringify(cfg)); setSheetStatus("연결됐습니다. 이제 지출을 추가하면 시트에도 들어갑니다."); }
+          else setSheetStatus("연결 실패: " + ((res && res.error) || "응답 없음"), true);
+        }).catch(function () { setSheetStatus("연결 실패: 주소를 확인하고, 배포 시 액세스 권한이 '모든 사용자'인지 확인하세요.", true); });
+        return;
+      }
+      if (f.id !== "lg-form") return;
+      e.preventDefault();
       var amt = parseFloat(f.amount.value);
-      if (!isFinite(amt) || amt < 0) return;
-      ledger.expenses.push({
+      if (!isFinite(amt) || amt <= 0) return;
+      var desc = f.desc.value.trim();
+      var x = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-        day: f.day.value, cat: f.cat.value, desc: f.desc.value.trim(), amount: amt,
-        currency: f.currency.value, method: f.method.value, split: f.split.value, payer: f.payer.value
-      });
+        day: tripDay(), cat: guessCat(desc), desc: desc, amount: Math.round(amt),
+        currency: "KRW", method: "", split: "2인", payer: f.payer.value, sync: ""
+      };
+      ledger.expenses.push(x);
       saveLedger(); updateBudget();
       f.desc.value = ""; f.amount.value = "";
-      f.amount.focus();
+      sendEntry(x);
     });
   }
 
