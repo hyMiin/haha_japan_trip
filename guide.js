@@ -8,7 +8,7 @@
   var LEDGER_KEY = "haha-trip-ledger-v7";
   var SHEET_KEY = "haha-trip-sheet-v1";
   // 한 번 누르는 연동 링크: #connect=<웹 앱 ID>.<비밀 코드> → 이 기기에 저장하고 주소창에서 지움
-  (function () {
+  function takeConnectLink() {
     var m = /^#connect=([A-Za-z0-9_-]{20,})\.([^&\/]+)$/.exec(location.hash);
     if (!m) return;
     try {
@@ -16,7 +16,9 @@
       window.__sheetConnected = true;
     } catch (e) { /* 저장 불가 */ }
     history.replaceState(null, "", location.pathname + "#budget");
-  })();
+    return true;
+  }
+  takeConnectLink();
   var CHECK_KEY = "haha-trip-checklist-v1";
   var G = window.GUIDE_DATA || { views: {}, budget: null };
 
@@ -235,13 +237,13 @@
       else setSheetStatus("시트에 추가했습니다" + (res.duplicate ? " (이미 있던 항목)" : "") + ".");
       return e.sync === "sent";
     }).catch(function () {
-      e.sync = "fail"; setSheetStatus("시트에 보내지 못했습니다(인터넷 연결 또는 웹 앱 주소 확인). '안 보낸 지출 보내기'로 다시 보낼 수 있어요.", true);
+      e.sync = "fail"; setSheetStatus("시트에 보내지 못했습니다(인터넷 연결 또는 웹 앱 주소 확인). 지출 내역의 '다시' 버튼으로 다시 보낼 수 있어요.", true);
       return false;
     }).then(function (ok) { saveLedger(); updateBudget(); return ok; });
   }
   function sendPending() {
     var list = ledger.expenses.filter(function (e) { return e.sync !== "sent"; });
-    if (!sheetCfg()) { setSheetStatus("먼저 웹 앱 주소와 비밀 코드를 저장하세요.", true); return; }
+    if (!sheetCfg()) { setSheetStatus("구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.", true); return; }
     if (!list.length) { setSheetStatus("보낼 지출이 없습니다."); return; }
     list.reduce(function (p, e) { return p.then(function () { return sendEntry(e); }); }, Promise.resolve());
   }
@@ -277,7 +279,7 @@
   function dayOf(date) { return { "2026-11-14": "DAY 1", "2026-11-15": "DAY 2", "2026-11-16": "DAY 3" }[date] || (date && date < "2026-11-14" ? "출국 전" : ""); }
   function readCapture(file) {
     var cfg = sheetCfg(), f = $("lg-form");
-    if (!cfg) { capMsg("먼저 아래 '구글 시트 연동'에 웹 앱 주소와 비밀 코드를 저장하세요.", true); return; }
+    if (!cfg) { capMsg("구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.", true); return; }
     capMsg("캡처를 읽는 중… (5~15초)");
     shrink(file).then(function (b64) {
       return post(cfg, { action: "extract", image: b64, mime: "image/jpeg" });
@@ -321,16 +323,9 @@
       '<label>결제금액(원)<input name="amount" type="number" inputmode="numeric" min="0" step="1" required></label>' +
       '<button type="submit" class="btn primary">추가</button></form>' +
       '<p class="g-note">날짜는 오늘 기준(11/14 → DAY 1)으로, 예산 항목은 입력한 단어로 자동 분류하고, 둘이 나눠 내는 2인 항목으로 저장합니다. 1인 항목은 아래 내역에서 바꿀 수 있어요.' +
-      (cfg ? " 추가하면 구글 시트에도 바로 들어갑니다." : " 구글 시트 연동은 아래에서 설정하세요.") + "</p></section>";
+      "</p>" +
+      '<p id="lg-sheet-status" class="g-note' + (cfg ? "" : " neg") + '">' + (window.__sheetConnected ? "연동 링크로 설정했습니다. 추가하면 구글 시트에도 바로 들어갑니다." : cfg ? "추가하면 구글 시트에도 바로 들어갑니다." : "구글 시트 연동이 안 되어 있어요. 연동 링크로 접속해 주세요.") + "</p></section>";
     h += '<section class="g-sec"><h3>지출 내역</h3><div class="g-table-wrap"><table class="g-table"><thead><tr><th>날짜</th><th>항목</th><th>내용</th><th>엔화</th><th>원화 환산</th><th>결제수단</th><th>1인/2인</th><th>결제자</th><th>시트</th><th></th></tr></thead><tbody id="lg-exp-body"></tbody></table></div></section>';
-    h += '<section class="g-sec"><h3>구글 시트 연동</h3><form id="lg-sheet" class="lg-form" autocomplete="off">' +
-      '<label class="wide">웹 앱 주소<input name="url" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="' + esc(cfg ? cfg.url : "") + '"></label>' +
-      '<label>비밀 코드<input name="token" type="password" value="' + esc(cfg ? cfg.token : "") + '"></label>' +
-      '<button type="submit" class="btn primary">저장 · 연결 확인</button>' +
-      '<button type="button" class="btn" id="lg-sync-all">안 보낸 지출 보내기</button>' +
-      '<button type="button" class="btn" id="lg-sheet-off">연동 끄기</button></form>' +
-      '<p id="lg-sheet-status" class="g-note">' + (window.__sheetConnected ? "연동 링크로 설정했습니다. 이 기기에서 바로 쓸 수 있어요." : cfg ? "연동됨 · 이 기기에만 저장되어 있습니다." : "연동 안 됨") + '</p>' +
-      '<p class="g-note">주소와 비밀 코드는 이 폰의 브라우저에만 저장되고 사이트에는 올라가지 않습니다. 뷰어에서 삭제하거나 결제자를 바꿔도 시트에는 반영되지 않으니 시트에서 직접 고쳐 주세요.</p></section>';
     h += '<section class="g-sec"><h3>사람별 결제 · 정산</h3><div id="lg-people"></div>' +
       '<p class="g-note">2인 항목은 반씩 나눠 부담하고, 1인 항목은 결제한 사람 몫으로 계산합니다. 결제자가 \'미지정\'인 항목은 정산에서 빠집니다.</p></section>';
     if (b.estimates) h += '<section class="g-sec"><h3>' + fmt(b.estimates.title) + "</h3>" + b.estimates.blocks.map(block).join("") + "</section>";
@@ -407,7 +402,7 @@
 
   /* ---------- events ---------- */
   function bind() {
-    window.addEventListener("hashchange", showView);
+    window.addEventListener("hashchange", function () { if (takeConnectLink()) renderView("budget"); showView(); });
     var gv = $("guide-view");
     gv.addEventListener("click", function (e) {
       var t = e.target.closest("[data-toc]");
