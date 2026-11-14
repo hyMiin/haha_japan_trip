@@ -184,7 +184,7 @@ window.TRIP_DATA = {
           kind: "stay", status: "booked", precision: "area",
           lat: 35.2456, lng: 139.0383,
           precisionNote: "주소 확인(強羅1320-601) · 지도 좌표는 가미고라역 부근 근사값",
-          time: "07:30–08:30 체크아웃 준비",
+          time: "08:00 기상 · 09:00–09:30 체크아웃 (캐리 서비스로 짐 발송)",
           desc: "체크아웃 후 가미고라역에서 케이블카를 탑니다.",
           checks: ["체크아웃 후 짐 처리 방법 (아래 '동선 점검' 참고)"],
           osmQuery: "箱根町強羅1320-601"
@@ -193,7 +193,7 @@ window.TRIP_DATA = {
           id: "d2-sounzan", order: 2, name: "소운잔역 (환승)", nameLocal: "早雲山駅",
           kind: "transit", status: "transit", precision: "landmark",
           lat: 35.2441, lng: 139.0355,
-          time: "08:30–09:00 도착 · 09:00 로프웨이 운행 시작",
+          time: "09:30–10:00 케이블카로 도착 → 로프웨이 환승",
           desc: "관광 목적지가 아닌 환승 지점. 케이블카 → 로프웨이.",
           checks: ["케이블카 첫차 시각", "로프웨이 운행 시작(공개 안내 2~11월 9:00)·기상 운휴"],
           osmQuery: "早雲山駅"
@@ -202,7 +202,7 @@ window.TRIP_DATA = {
           id: "d2-owakudani", order: 3, name: "오와쿠다니", nameLocal: "大涌谷",
           kind: "visit", status: "course", precision: "landmark",
           lat: 35.2440, lng: 139.0196,
-          time: "09:15–10:30",
+          time: "10:20–11:45",
           desc: "화산 분기 지대 전망. 로프웨이 오와쿠다니역 바로 앞.",
           checks: ["11/15 로프웨이 운행 여부 (악천후·화산가스·점검 운휴 가능)", "화산 활동에 따른 출입 규제"],
           osmQuery: "大涌谷"
@@ -212,7 +212,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "course", precision: "reference",
           lat: 35.2440, lng: 139.0196,
           precisionNote: "판매점(くろたまご館 등) 위치 — 오와쿠다니 대표 지점을 기준점으로 표시",
-          time: "09:15–10:30 중",
+          time: "10:20–11:45 중",
           desc: "온천 연못에서 삶은 검은 달걀. 오와쿠다니에서만 판매.",
           checks: ["방문일 판매 시간·가격"],
           osmQuery: "大涌谷くろたまご館"
@@ -221,7 +221,7 @@ window.TRIP_DATA = {
           id: "d2-yumoto", order: 5, name: "하코네유모토역 (짐 회수·출발)", nameLocal: "箱根湯本駅",
           kind: "transit", status: "transit", precision: "landmark",
           lat: 35.2326, lng: 139.1055,
-          time: "15:15 짐 수령 · 15:36 로망스카 출발 [예약 변경 · 14:16에서]",
+          time: "13:15 도착 · 점심·온천마을 · 15:15 짐 수령 · 15:36 로망스카 출발 [예약 완료]",
           desc: "신주쿠행 로망스카 출발지. 하코네 20호(EXE) 15:36 → 신주쿠 17:05, 1호차 12A·12B 예약 완료(14:16에서 변경), 운임은 오와쿠다니 패스로 개찰.",
           checks: ["캐리 서비스 짐 수령 (유모토역 · 13:30 이후)"],
           osmQuery: "箱根湯本駅"
@@ -231,7 +231,7 @@ window.TRIP_DATA = {
           kind: "stay", status: "booked", precision: "area",
           lat: 35.6968, lng: 139.7006,
           precisionNote: "주소 확인(歌舞伎町2-40-3) · 지도 좌표는 주소 기준 근사값 (세이부신주쿠역 북쪽 도보 약 2분)",
-          time: "16:00–16:30 체크인 · 22:30–23:00 복귀 · 11/16 08:00–08:30 체크아웃",
+          time: "17:20–17:50 체크인 · 22:30–23:00 복귀 · 11/16 08:00–08:30 체크아웃",
           desc: "1박 · 2인 · 예약 완료(141,935원, Agoda 43346). 주소: 〒160-0021 東京都新宿区歌舞伎町2-40-3 (예약 정보 기준) — Premier Hotel -CABIN- Shinjuku 공식 주소와 일치합니다. 세이부신주쿠역 도보 약 2분, JR 신주쿠역 동쪽 출구 도보 약 8~10분.",
           checks: ["체크인 시각 (공식 안내 15:00)", "도시세(숙박세) 현장 결제 여부"],
           links: [{ label: "Agoda 예약 페이지 (Property ID 43346)", url: "https://www.agoda.com/ko-kr/accom/property?propertyId=43346&countryId=3&checkIn=2026-11-15&adults=2&rooms=1&los=1" }],
@@ -252,7 +252,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "optional", precision: "area",
           lat: 35.6484, lng: 139.7024,
           precisionNote: "다이칸야마역 주변 거리의 대표 지점",
-          time: "17:00–18:30",
+          time: "[제외] 11/14 결정",
           desc: "[11/14 결정: 이번 일정에서 제외 · 기록용으로 유지] 다이칸야마 거리와 골목 산책.",
           checks: [],
           osmQuery: "代官山駅"
@@ -262,7 +262,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "optional", precision: "reference", yoonha: "check",
           lat: 35.6484, lng: 139.7024,
           precisionNote: "촬영 위치 미확인 — 다이칸야마 거리 대표 지점을 기준점으로 표시",
-          time: "17:00–18:30 중",
+          time: "[제외] 11/14 결정",
           desc: "[11/14 결정: 이번 일정에서 제외 · 기록용으로 유지] 「윤하, 일본을 담다」 관련 다이칸야마 지역.",
           checks: ["실제 촬영 장소 (영상 장면과 대조)"],
           osmQuery: "代官山"
@@ -271,7 +271,7 @@ window.TRIP_DATA = {
           id: "d2-tsite", order: 10, name: "다이칸야마 T-SITE / 츠타야 서점", nameLocal: "代官山 T-SITE 蔦屋書店",
           kind: "visit", status: "optional", precision: "landmark",
           lat: 35.6489, lng: 139.6997,
-          time: "17:00–18:30 중",
+          time: "[제외] 11/14 결정",
           desc: "[11/14 결정: 이번 일정에서 제외 · 기록용으로 유지] 츠타야 서점 다이칸야마점.",
           checks: ["방문일 영업시간"],
           osmQuery: "代官山 蔦屋書店"
@@ -280,7 +280,7 @@ window.TRIP_DATA = {
           id: "d2-hachiko", order: 11, name: "하치코 동상", nameLocal: "忠犬ハチ公像",
           kind: "visit", status: "course", precision: "landmark",
           lat: 35.6590, lng: 139.7006,
-          time: "19:00–20:00 중",
+          time: "18:05–19:15 중",
           desc: "시부야역 하치코 출구 앞.",
           checks: [],
           osmQuery: "忠犬ハチ公像"
@@ -289,7 +289,7 @@ window.TRIP_DATA = {
           id: "d2-scramble", order: 12, name: "시부야 스크램블 교차로", nameLocal: "渋谷スクランブル交差点",
           kind: "visit", status: "course", precision: "landmark",
           lat: 35.6595, lng: 139.7004,
-          time: "19:00–20:00 중",
+          time: "18:05–19:15 중",
           desc: "하치코 동상 바로 앞의 대형 교차로.",
           checks: [],
           osmQuery: "渋谷スクランブル交差点"
@@ -298,7 +298,7 @@ window.TRIP_DATA = {
           id: "d2-tower", order: 13, name: "타워레코드 시부야", nameLocal: "タワーレコード渋谷店",
           kind: "visit", status: "course", precision: "landmark",
           lat: 35.6615, lng: 139.7013,
-          time: "19:00–20:00 중",
+          time: "18:05–19:15 중",
           desc: "대형 음반 매장.",
           checks: ["방문일 영업시간"],
           osmQuery: "タワーレコード渋谷店"
@@ -308,7 +308,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "course", precision: "area",
           lat: 35.6603, lng: 139.6987,
           precisionNote: "센터가이 일대 대표 지점",
-          time: "20:00–21:00 저녁",
+          time: "19:15–20:30 저녁",
           desc: "시부야 상업 거리 산책과 저녁 식사(식당 미정).",
           checks: ["저녁 식당"],
           osmQuery: "渋谷センター街"
@@ -318,7 +318,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "course", precision: "landmark",
           lat: 35.6612, lng: 139.6977,
           precisionNote: "주소(시부야구 우다가와초 28-6) 기준 근사 좌표",
-          time: "21:00–22:30 · 쇼핑 예산 2인 70,000원(초기 배정)",
+          time: "20:30–22:30 · 쇼핑 예산 2인 70,000원(초기 배정)",
           desc: "DAY 2 마지막 일정. 시부야 본점 방문이 어려우면 신주쿠 숙소 근처 돈키호테 신주쿠 동남구점으로 대체합니다. 2026년 11월부터 일본 면세 방식이 바뀌었는지 '예약·티켓 / 쇼핑' 메뉴를 확인하세요.",
           checks: ["영업시간·면세 카운터 운영시간", "면세 절차·최소 구매금액(2026년 11월 기준)", "SOL트래블 카드 결제 가능 여부", "한국 반입 제한 품목(육류 가공품·의약품·액체류)"],
           osmQuery: "MEGAドン・キホーテ渋谷本店"
