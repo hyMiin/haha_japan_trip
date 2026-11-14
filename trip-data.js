@@ -46,14 +46,14 @@ window.TRIP_DATA = {
         { time: "10:55–11:50", text: "나리타 T2 도착 → 입국(토요일 오전 대기 감안 약 1시간 추정)(Visit Japan Web QR) · 교통카드 준비(Welcome Suica 등, '결제·Wallet' 메뉴 참고)", kind: "flight", place: "d1-narita" },
         { time: "12:00 전후", text: "게이세이 본선 특급 空港第2ビル역 → 닛포리 (예약 없음 · 교통카드/현금 · 약 1시간 20~30분 · 1인 약 1,060엔, 2차 출처 · 지정석 없음)", kind: "move" },
         { time: "13:20–13:50", text: "JR 야마노테선 닛포리 → 신주쿠 (약 25분 · 1인 200엔대 추정)", kind: "move" },
-        { time: "13:50–14:45", text: "신주쿠 도착 · 점심 (오다큐 신주쿠역 서쪽 출구 근처 권장 · 14:45에는 식당 출발)", kind: "meal", place: "d1-shinjuku" },
-        { time: "14:45–14:55", text: "오다큐 개찰구: 오와쿠다니 패스 '사용하기' → QR로 통과", kind: "move", place: "d1-shinjuku" },
-        { time: "15:00", text: "로망스카 신주쿠 15:00 → 하코네유모토 16:30 전후 (도착 시각 추정 · EMot에서 확인) [예약 완료] (특급권 2명 · 운임은 오와쿠다니 패스)", kind: "move" },
-        { time: "16:30–17:00", text: "하코네유모토: 치모토 먼저(17:00까지) · 시간 남으면 다케이치 완자 · 온천마을·족탕은 다음 날 하산 때로 미뤄도 됨", kind: "visit", place: "d1-onsen-town" },
-        { time: "17:00–18:15", text: "등산전차 유모토 → 고라 (약 35분) → 케이블카 → 가미고라 (오와쿠다니 패스 · 주말 대기 가능)", kind: "move", place: "d1-gora" },
-        { time: "18:30 전후", text: "Gora Onsen Kinkaku 체크인 [예약 완료] — 숙소에 18:30쯤 도착한다고 미리 알리기", kind: "stay", place: "d1-kinkaku" },
-        { time: "18:30–19:30", text: "저녁 식사 (식당 미정 · 고라 지역 영업시간 확인 또는 유모토에서 미리 구매)", kind: "meal" },
-        { time: "19:30 이후", text: "프라이빗 온천 및 휴식 (예약 가능 시간 숙소 확인)", kind: "stay" }
+        { time: "15:05–15:25", text: "신주쿠 도착(추정) · 점심은 짧게 또는 도시락 사서 로망스카 안에서 (입국 12:47 · 게이세이 본선 기준)", kind: "meal", place: "d1-shinjuku" },
+        { time: "15:25–15:35", text: "오다큐 개찰구: 오와쿠다니 패스 '사용하기' → QR로 통과", kind: "move", place: "d1-shinjuku" },
+        { time: "15:40", text: "로망스카 신주쿠 15:40 → 하코네유모토 17:10 전후 (도착 시각 추정 · EMot에서 확인) [예약 완료] (특급권 2명 · 운임은 오와쿠다니 패스)", kind: "move" },
+        { time: "17:10", text: "하코네유모토 도착 → 관광 없이 바로 등산전차로 (치모토 17:00 종료 · 유모토 구경은 11/15 하산 때)", kind: "move" },
+        { time: "17:15–18:30", text: "등산전차 유모토 → 고라 (약 35분) → 케이블카 → 가미고라 (오와쿠다니 패스 · 주말 대기 가능)", kind: "move", place: "d1-gora" },
+        { time: "18:30–18:45", text: "Gora Onsen Kinkaku 체크인 [예약 완료] — 숙소에 18:45쯤 도착한다고 미리 알리기", kind: "stay", place: "d1-kinkaku" },
+        { time: "19:00–20:30", text: "저녁: 케이블카로 고라까지 내려가 다비야(たび屋, 22:30까지) 등 — 체크인 후", kind: "meal" },
+        { time: "20:30 이후", text: "프라이빗 온천 및 휴식 (예약 가능 시간 숙소 확인)", kind: "stay" }
       ],
       places: [
         {
@@ -79,7 +79,7 @@ window.TRIP_DATA = {
           id: "d1-yumoto-st", order: 3, name: "하코네유모토역", nameLocal: "箱根湯本駅",
           kind: "transit", status: "transit", precision: "landmark",
           lat: 35.2326, lng: 139.1055,
-          time: "16:30 전후 도착 (로망스카 15:00 · 추정) · 17:00 전후 고라행 출발",
+          time: "17:10 전후 도착 (로망스카 15:40 · 추정) · 바로 고라행",
           desc: "하코네 관광의 출발점. 이후 등산전차로 고라까지 이동합니다.",
           checks: ["짐 보관·운송 서비스 실제 이용 가능 여부"],
           osmQuery: "箱根湯本駅"
@@ -100,7 +100,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "course", precision: "reference", yoonha: "check",
           lat: 35.2326, lng: 139.1055,
           precisionNote: "정확한 매장 위치 미확인 — 하코네유모토역을 기준점으로 표시",
-          time: "16:30–17:00 중 (시간 남으면 · 다음 날 하산 때도 가능)",
+          time: "11/15 하산 때 (11/14는 시간 없음)",
           desc: "하코네유모토 상점가에서 먹을 완자(어묵 꼬치) 간식.",
           checks: ["정확한 매장 위치", "영업시간", "윤일담 실제 촬영지인지 여부"],
           osmQuery: "竹いち 箱根湯本"
@@ -110,7 +110,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "course", precision: "area", yoonha: "check",
           lat: 35.2319, lng: 139.1036,
           precisionNote: "역 앞 상점가 일대의 대표 지점",
-          time: "16:30–17:00 중 (시간 남으면 · 다음 날 하산 때도 가능)",
+          time: "11/15 하산 때 (11/14는 시간 없음)",
           desc: "역 앞 상점가와 하야카와 강변 온천마을 산책. DAY 1의 윤일담 관련 코스입니다.",
           checks: ["윤일담 실제 촬영지와 일반 방문 장소의 구분"],
           osmQuery: "箱根湯本 温泉街"
@@ -120,7 +120,7 @@ window.TRIP_DATA = {
           kind: "visit", status: "course", precision: "reference",
           lat: 35.2319, lng: 139.1036,
           precisionNote: "족탕 위치 미확인 — 온천마을 대표 지점을 기준점으로 표시",
-          time: "16:30–17:00 중 (시간 남으면 · 다음 날 하산 때도 가능)",
+          time: "11/15 하산 때 (11/14는 시간 없음)",
           desc: "온천마을 산책 중 들를 족탕.",
           checks: ["족탕의 위치", "방문일 운영 여부"],
           osmQuery: "箱根湯本 足湯"
@@ -129,7 +129,7 @@ window.TRIP_DATA = {
           id: "d1-gora", order: 8, name: "고라역 (환승)", nameLocal: "強羅駅",
           kind: "transit", status: "transit", precision: "landmark",
           lat: 35.2503, lng: 139.0471,
-          time: "17:00–18:15 이동 중",
+          time: "17:15–18:30 이동 중",
           desc: "관광 목적지가 아닌 환승 지점. 등산전차 → 케이블카로 갈아탑니다.",
           checks: ["하코네유모토 → 고라 등산전차 운행시간", "고라 → 가미고라 케이블카 운행시간", "11월 주말 혼잡·대기"],
           osmQuery: "強羅駅"
@@ -139,7 +139,7 @@ window.TRIP_DATA = {
           kind: "stay", status: "booked", precision: "area",
           lat: 35.2456, lng: 139.0383,
           precisionNote: "주소 확인(強羅1320-601) · 지도 좌표는 가미고라역 부근 근사값",
-          time: "18:30 전후 체크인 (숙소에 미리 알림) · 11/15 체크아웃",
+          time: "18:30–18:45 체크인 (숙소에 미리 알림) · 11/15 체크아웃",
           desc: "1박 · 2인 · 예약 완료(160,821원). 주소: 〒250-0408 神奈川県足柄下郡箱根町強羅1320-601 (예약 정보 기준). 가장 가까운 역은 가미고라역. 예약제 프라이빗 온천(무료).",
           checks: ["숙소에 18:30쯤 도착 예정 알리기", "프라이빗 온천 예약 가능 시간·이용 조건", "하코네 캐리 서비스 이용 가능 여부 (11/15 체크아웃 짐)", "고라 지역 저녁 식사 또는 사전 음식 구매"],
           links: [
