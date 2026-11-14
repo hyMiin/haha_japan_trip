@@ -43,10 +43,10 @@ window.TRIP_DATA = {
       color: "#E0795A",
       schedule: [
         { time: "08:35", text: "티웨이 TW241 인천 T1 08:35 → 나리타 T2 10:55 [예약 완료 · 2명 · 직항]", kind: "flight" },
-        { time: "10:55–11:50", text: "나리타 T2 도착 → 입국(토요일 오전 대기 감안 약 1시간 추정)(Visit Japan Web QR) · 교통카드 준비(Welcome Suica 등, '결제·Wallet' 메뉴 참고)", kind: "flight", place: "d1-narita" },
-        { time: "12:00 전후", text: "게이세이 본선 특급 空港第2ビル역 → 닛포리 (예약 없음 · 교통카드/현금 · 약 1시간 20~30분 · 1인 약 1,060엔, 2차 출처 · 지정석 없음)", kind: "move" },
+        { time: "10:55–12:47", text: "나리타 T2 도착 → 입국 완료 12:47 (실제)(Visit Japan Web QR) · 교통카드 준비(Welcome Suica 등, '결제·Wallet' 메뉴 참고)", kind: "flight", place: "d1-narita" },
         { time: "14:02", text: "스카이라이너 空港第2ビル 14:02 → 닛포리 14:38 전후 [현장 구매 · 2명 · 전석 지정석] — 게이세이 본선 快速은 하네다행이라 닛포리 미정차로 변경", kind: "move" },
         { time: "14:38–15:05", text: "닛포리 JR 환승 개찰구(표 넣고 스이카) → JR 야마노테선 池袋・新宿方面 → 신주쿠 (약 20분)", kind: "move" },
+        { time: "15:05–15:25", text: "신주쿠 도착(추정) · 점심은 짧게 — 도시락·오니기리 사서 로망스카 안에서 (스카이라이너 14:02 기준)", kind: "meal", place: "d1-shinjuku" },
         { time: "15:25–15:35", text: "오다큐 개찰구: 오와쿠다니 패스 '사용하기' → QR로 통과", kind: "move", place: "d1-shinjuku" },
         { time: "15:40", text: "로망스카 신주쿠 15:40 → 하코네유모토 17:10 전후 (도착 시각 추정 · EMot에서 확인) [예약 완료] (특급권 2명 · 운임은 오와쿠다니 패스)", kind: "move" },
         { time: "17:10", text: "하코네유모토 도착 → 관광 없이 바로 등산전차로 (치모토 17:00 종료 · 유모토 구경은 11/15 하산 때)", kind: "move" },
